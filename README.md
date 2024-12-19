@@ -1,1 +1,1 @@
-# mexc_cpp_api
+# MEXC C++ API
