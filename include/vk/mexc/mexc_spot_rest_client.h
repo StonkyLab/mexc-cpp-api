@@ -15,15 +15,12 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "mexc_enums.h"
 
 namespace vk::mexc::spot {
-
 class RESTClient {
-
     struct P;
-    std::unique_ptr <P> m_p{};
+    std::unique_ptr<P> m_p{};
 
 public:
-
-    RESTClient(const std::string &apiKey, const std::string &apiSecret);
+    RESTClient(const std::string& apiKey, const std::string& apiSecret);
 
     ~RESTClient();
 
@@ -32,7 +29,7 @@ public:
      * @param apiKey
      * @param apiSecret
      */
-    void setCredentials(const std::string &apiKey, const std::string &apiSecret) const;
+    void setCredentials(const std::string& apiKey, const std::string& apiSecret) const;
 
     /**
      * Download historical candles
@@ -46,7 +43,8 @@ public:
      * @see https://mexcdevelop.github.io/apidocs/spot_v3_en/#kline-candlestick-data
      */
     [[nodiscard]] std::vector<Candle>
-    getHistoricalPrices(const std::string &symbol, CandleInterval interval, std::int64_t startTime, std::int64_t endTime,
+    getHistoricalPrices(const std::string& symbol, CandleInterval interval, std::int64_t startTime,
+                        std::int64_t endTime,
                         std::int32_t limit = 500) const;
 
     /**
@@ -56,6 +54,15 @@ public:
      * @see https://mexcdevelop.github.io/apidocs/spot_v3_en/#check-server-time
     */
     [[nodiscard]] std::int64_t getServerTime() const;
+
+    /**
+     * Returns Ticker price for a specified symbol
+     * @param symbol Prices of all symbols will be sent if symbol was not given
+     * @return Filled TickerPrice structure
+     * @throws nlohmann::json::exception, std::exception
+     * @see https://mexcdevelop.github.io/apidocs/spot_v3_en/#symbol-price-ticker
+     */
+    std::vector<TickerPrice> getTickerPrice(const std::string& symbol) const;
 };
 }
 

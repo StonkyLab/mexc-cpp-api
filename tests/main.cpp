@@ -2,7 +2,6 @@
 #include "vk/mexc/mexc_spot_rest_client.h"
 #include "vk/tools/json_utils.h"
 #include <memory>
-#include <iostream>
 #include <fstream>
 #include <thread>
 #include <spdlog/spdlog.h>
@@ -13,10 +12,9 @@
 using namespace vk::mexc;
 using namespace std::chrono_literals;
 
-constexpr int HISTORY_LENGTH_IN_S = 86400; // 1 day
+constexpr int HISTORY_LENGTH_IN_S = 86400 * 7; // 7 days
 
-bool checkCandles(const std::vector<Candle> &candles, const CandleInterval interval) {
-
+bool checkCandles(const std::vector<Candle>& candles, const CandleInterval interval) {
     const auto mSecs = MEXC::numberOfMsForCandleInterval(interval);
 
     for (auto i = 0; i < candles.size() - 1; i++) {
@@ -28,8 +26,22 @@ bool checkCandles(const std::vector<Candle> &candles, const CandleInterval inter
     return true;
 }
 
-void testHistory() {
+void saveCandles(const std::vector<Candle>& candles, const std::string& filePath) {
+    if (std::ofstream file(filePath); !file.is_open()) {
+        spdlog::error("Failed to open file {}", filePath);
+    }
+    else {
+        file << "OpenTime" << "," << "CloseTime" << "," << "Open" << "," << "High" << "," << "Low" << "," << "Close" <<
+            "," << "Volume" << std::endl;
+        for (const auto& c : candles) {
+            file << c.m_openTime << "," << c.m_closeTime << "," << c.m_open.str(8, std::ios_base::fixed) << "," << c.
+                m_high.str(8, std::ios_base::fixed) << "," << c.m_low.str(8, std::ios_base::fixed) << "," << c.m_close.
+                str(8, std::ios_base::fixed) << "," << c.m_volume.str(10, std::ios_base::fixed) << std::endl;
+        }
+    }
+}
 
+void testHistory() {
     try {
         const auto restClient = std::make_unique<spot::RESTClient>("", "");
 
@@ -40,16 +52,33 @@ void testHistory() {
 
         if (const auto isOK = checkCandles(candles, CandleInterval::_1m); !isOK) {
             spdlog::error("Gaps in candles!");
-        }else {
+        }
+        else {
+            saveCandles(candles, "PLSUSDT.csv");
             spdlog::info("Candles OK");
         }
     }
-    catch (std::exception &e) {
+    catch (std::exception& e) {
+        spdlog::error("{}", e.what());
+    }
+}
+
+void testTickerPrice() {
+    try {
+        const auto restClient = std::make_unique<spot::RESTClient>("", "");
+        const auto tickerPrices = restClient->getTickerPrice("PLSUSDT");
+
+        if (tickerPrices.size() == 1) {
+            spdlog::info("Ticker price = {}", tickerPrices[0].m_price.convert_to<std::string>());
+        }
+    }
+    catch (std::exception& e) {
         spdlog::error("{}", e.what());
     }
 }
 
 int main() {
-    testHistory();
+    //testHistory();
+    testTickerPrice();
     return getchar();
 }

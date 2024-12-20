@@ -10,10 +10,9 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/mexc/mexc_http_session.h"
 #include "vk/mexc/mexc.h"
 #include "vk/tools/utils.h"
+#include "vk/tools/json_utils.h"
 #include <fmt/format.h>
 #include <mutex>
-
-#include "vk/tools/json_utils.h"
 
 namespace vk::mexc::spot {
 template <typename ValueType>
@@ -52,6 +51,7 @@ public:
     [[nodiscard]] std::vector<Candle>
     getHistoricalPrices(const std::string& symbol, const CandleInterval interval, const std::int64_t startTime,
                         const std::int64_t endTime, const std::int32_t limit) const {
+        std::vector<Candle> retVal;
         const std::string path = "/api/v3/klines";
         std::map<std::string, std::string> parameters;
         parameters.insert_or_assign("symbol", symbol);
@@ -64,9 +64,14 @@ public:
         }
 
         const auto response = checkResponse(m_httpSession->methodGet(path, parameters));
-        Candles retVal;
-        retVal.fromJson(nlohmann::json::parse(response.body()));
-        return retVal.m_candles;
+
+        for (const auto responseJson = nlohmann::json::parse(response.body()); const auto& el : responseJson) {
+            Candle candle;
+            candle.fromJson(el);
+            retVal.push_back(candle);
+        }
+
+        return retVal;
     }
 };
 
@@ -117,5 +122,29 @@ std::int64_t RESTClient::getServerTime() const {
     ServerTime retVal;
     retVal.fromJson(nlohmann::json::parse(response.body()));
     return retVal.m_serverTime;
+}
+
+std::vector<TickerPrice> RESTClient::getTickerPrice(const std::string& symbol) const {
+    std::vector<TickerPrice> retVal;
+    const std::string path = "/api/v3/ticker/price";
+    std::map<std::string, std::string> parameters;
+    parameters.insert_or_assign("symbol", symbol);
+
+    const auto response = P::checkResponse(m_p->m_httpSession->methodGet(path, parameters));
+
+    if (const auto responseJson = nlohmann::json::parse(response.body()); responseJson.type() == nlohmann::json::object()) {
+        TickerPrice tickerPrice;
+        tickerPrice.fromJson(responseJson);
+        retVal.push_back(tickerPrice);
+    }
+    else if (responseJson.type() == nlohmann::json::array()) {
+        for (const auto& el : responseJson.items()) {
+            TickerPrice tickerPrice;
+            tickerPrice.fromJson(el.value());
+            retVal.push_back(tickerPrice);
+        }
+    }
+
+    return retVal;
 }
 }

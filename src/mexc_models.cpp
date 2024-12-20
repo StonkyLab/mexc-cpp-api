@@ -34,16 +34,12 @@ void Candle::fromJson(const nlohmann::json& json) {
     m_quoteAssetVolume.assign(json[7].get<std::string>());
 }
 
-nlohmann::json Candles::toJson() const {
-    throw std::runtime_error("Unimplemented: Candles::toJson()");
+nlohmann::json TickerPrice::toJson() const {
+    throw std::runtime_error("Unimplemented: TickerPrice::toJson()");
 }
 
-void Candles::fromJson(const nlohmann::json& json) {
-
-    for (const auto& el : json) {
-        Candle candle;
-        candle.fromJson(el);
-        m_candles.push_back(candle);
-    }
+void TickerPrice::fromJson(const nlohmann::json& json) {
+    readValue<std::string>(json, "symbol", m_symbol);
+    m_price.assign(json["price"].get<std::string>());
 }
 }

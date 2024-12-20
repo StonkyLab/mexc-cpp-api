@@ -37,8 +37,9 @@ struct Candle final : IJson {
     void fromJson(const nlohmann::json& json) override;
 };
 
-struct Candles final : IJson {
-    std::vector<Candle> m_candles;
+struct TickerPrice final : IJson {
+    std::string m_symbol{};
+    boost::multiprecision::cpp_dec_float_50 m_price{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
