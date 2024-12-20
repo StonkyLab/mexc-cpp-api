@@ -18,7 +18,10 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(magic_enum REQUIRED)
 
 include_directories(include vk_cpp_tools/include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
-add_subdirectory(vk_cpp_tools)
+
+if (NOT TARGET vk_tools)
+    add_subdirectory(vk_cpp_tools)
+endif()
 
 set(HEADERS
         include/vk/mexc/mexc.h
@@ -38,5 +41,5 @@ set(SOURCES
 add_library(mexc_api OBJECT ${SOURCES} ${HEADERS})
 target_link_libraries(mexc_api PRIVATE OpenSSL::Crypto OpenSSL::SSL vk_tools nlohmann_json::nlohmann_json)
 
-add_executable(test tests/main.cpp)
-target_link_libraries(test PRIVATE spdlog::spdlog_header_only mexc_api)
+add_executable(test_mexc_api tests/main.cpp)
+target_link_libraries(test_mexc_api PRIVATE spdlog::spdlog_header_only mexc_api)
