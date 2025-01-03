@@ -13,13 +13,13 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/tools/i_json.h"
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
-namespace vk::mexc {
+namespace vk::mexc::spot {
 struct ServerTime final : IJson {
     std::int64_t m_serverTime{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
-    void fromJson(const nlohmann::json& json) override;
+    void fromJson(const nlohmann::json &json) override;
 };
 
 struct Candle final : IJson {
@@ -34,7 +34,7 @@ struct Candle final : IJson {
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
-    void fromJson(const nlohmann::json& json) override;
+    void fromJson(const nlohmann::json &json) override;
 };
 
 struct TickerPrice final : IJson {
@@ -43,7 +43,32 @@ struct TickerPrice final : IJson {
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
-    void fromJson(const nlohmann::json& json) override;
+    void fromJson(const nlohmann::json &json) override;
+};
+}
+
+namespace vk::mexc::futures {
+struct Response : IJson {
+    int m_code{};
+    bool m_success{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct FundingRate final : Response {
+    std::string m_symbol{};
+    boost::multiprecision::cpp_dec_float_50 m_fundingRate{};
+    boost::multiprecision::cpp_dec_float_50 m_maxFundingRate{};
+    boost::multiprecision::cpp_dec_float_50 m_minFundingRate{};
+    std::int32_t m_collectCycle{};
+    std::int64_t m_nextSettleTime{};
+    std::int64_t m_timestamp{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
 };
 }
 

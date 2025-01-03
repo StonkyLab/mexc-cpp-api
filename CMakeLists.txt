@@ -29,6 +29,8 @@ set(HEADERS
         include/vk/mexc/mexc_http_session.h
         include/vk/mexc/mexc_models.h
         include/vk/mexc/mexc_spot_rest_client.h
+        include/vk/mexc/mexc_futures_rest_client.h
+        include/vk/mexc/mexc_exchange_connector.h
 )
 
 set(SOURCES
@@ -36,6 +38,8 @@ set(SOURCES
         src/mexc_http_session.cpp
         src/mexc_models.cpp
         src/mexc_spot_rest_client.cpp
+        src/mexc_futures_rest_client.cpp
+        src/mexc_exchange_connector.cpp
 )
 
 add_library(mexc_api OBJECT ${SOURCES} ${HEADERS})

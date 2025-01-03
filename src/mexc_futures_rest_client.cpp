@@ -1,0 +1,35 @@
+/**
+MEXC Futures REST Client
+
+Licensed under the MIT License <http://opensource.org/licenses/MIT>.
+SPDX-License-Identifier: MIT
+Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
+*/
+
+#include "vk/mexc/mexc_futures_rest_client.h"
+#include "vk/mexc/mexc_http_session.h"
+
+namespace vk::mexc::futures {
+
+struct RESTClient::P {
+    RESTClient *m_parent = nullptr;
+    std::shared_ptr<HTTPSession> m_httpSession;
+
+    explicit P(RESTClient *parent) {
+        m_parent = parent;
+    }
+};
+
+RESTClient::RESTClient(const std::string &apiKey, const std::string &apiSecret) : m_p(
+    std::make_unique<P>(this)) {
+    m_p->m_httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
+}
+
+RESTClient::~RESTClient() = default;
+
+void RESTClient::setCredentials(const std::string &apiKey, const std::string &apiSecret) const {
+    m_p->m_httpSession.reset();
+    m_p->m_httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
+}
+
+}
