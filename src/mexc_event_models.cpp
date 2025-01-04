@@ -50,10 +50,10 @@ nlohmann::json Event::toJson() const {
 }
 
 void Event::fromJson(const nlohmann::json &json) {
-    //    readValue<std::string>(json, "topic", m_topic);
-    //    readMagicEnum<ResponseType>(json, "type", m_type);
-    //    readValue<std::int64_t>(json, "ts", m_ts);
-    //    m_data = json["data"];
+    readValue<std::string>(json, "channel", m_channel);
+    readValue<std::string>(json, "symbol", m_symbol);
+    readValue<std::int64_t>(json, "ts", m_ts);
+    m_data = json["data"];
 }
 
 nlohmann::json EventTicker::toJson() const {

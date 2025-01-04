@@ -27,8 +27,9 @@ class WebSocketSession final : public std::enable_shared_from_this<WebSocketSess
     boost::beast::websocket::stream<boost::beast::ssl_stream<boost::beast::tcp_stream>> m_ws;
     boost::beast::multi_buffer m_buffer;
     std::string m_host;
-    std::vector<std::string> m_subscriptions;
-    std::list<std::string> m_subscriptionRequests;
+    std::vector<nlohmann::json> m_subscriptions;
+    std::list<nlohmann::json> m_subscriptionRequests;
+    nlohmann::json m_subscribing;
     onLogMessage m_logMessageCB;
     onDataEvent m_dataEventCB;
     boost::asio::steady_timer m_pingTimer;
@@ -36,7 +37,7 @@ class WebSocketSession final : public std::enable_shared_from_this<WebSocketSess
     std::chrono::time_point<std::chrono::system_clock> m_lastPongTime{};
     mutable std::recursive_mutex m_subscriptionLocker;
 
-    void writeSubscription(const std::string& subscription);
+    void writeSubscription(const nlohmann::json &subscriptionRequest);
 
     std::string readSubscription();
 
@@ -72,11 +73,11 @@ public:
      * Run the session.
      * @param host
      * @param port
-     * @param subscriptionFilter Must not be empty
+     * @param subscriptionRequest
      * @param dataEventCB Data Message callback
      */
     void
-    run(const std::string& host, const std::string& port, const std::string& subscriptionFilter,
+    run(const std::string& host, const std::string& port, const nlohmann::json &subscriptionRequest,
         const onDataEvent& dataEventCB);
 
     /**
@@ -86,17 +87,17 @@ public:
 
     /**
      * Subscribe WebSocket according to the subscriptionFilter
-     * @param subscriptionFilter e.g. instrument_info.100ms.BTCUSD
+     * @param subscriptionRequest
      * @see https://bybit-exchange.github.io/docs/futuresV2/linear/?console#t-subscribe
      */
-    void subscribe(const std::string& subscriptionFilter);
+    void subscribe(const nlohmann::json &subscriptionRequest);
 
     /**
      * Check if a stream is already subscribed
-     * @param subscriptionFilter
+     * @param subscriptionRequest
      * @return True if subscribed
      */
-    [[nodiscard]] bool isSubscribed(const std::string& subscriptionFilter) const;
+    [[nodiscard]] bool isSubscribed(const nlohmann::json &subscriptionRequest) const;
 };
 }
 #endif //INCLUDE_VK_MEXC_WS_SESSION_V5_H

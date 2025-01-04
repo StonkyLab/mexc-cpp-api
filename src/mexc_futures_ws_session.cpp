@@ -17,8 +17,8 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 namespace vk::mexc::futures {
 static constexpr int PING_INTERVAL_IN_S = 20;
 
-WebSocketSession::WebSocketSession(boost::asio::io_context& ioc, boost::asio::ssl::context& ctx,
-                                   const onLogMessage& onLogMessageCB) : m_resolver(make_strand(ioc)),
+WebSocketSession::WebSocketSession(boost::asio::io_context &ioc, boost::asio::ssl::context &ctx,
+                                   const onLogMessage &onLogMessageCB) : m_resolver(make_strand(ioc)),
                                                                          m_ws(make_strand(ioc), ctx),
                                                                          m_pingTimer(ioc, boost::asio::chrono::seconds(
                                                                              PING_INTERVAL_IN_S)) {
@@ -31,26 +31,19 @@ WebSocketSession::~WebSocketSession() {
     m_logMessageCB(LogSeverity::Info, "WebSocketSession destroyed");
 }
 
-void WebSocketSession::writeSubscription(const std::string& subscription) {
+void WebSocketSession::writeSubscription(const nlohmann::json &subscriptionRequest) {
     std::lock_guard lk(m_subscriptionLocker);
 
     /// Check if already subscribed
+    for (const auto &sub: m_subscriptions) {
+        if (sub["method"] == subscriptionRequest["method"]) {
+            if (sub["symbol"] == subscriptionRequest["symbol"]) {
+                return;
+            }
+        }
+    }
 
-    // for (const auto& filter : m_subscriptions) {
-    //     if (filter == subscription) {
-    //         return;
-    //     }
-    // }
-    //
-    // nlohmann::json subJson;
-    //
-    // std::vector<std::string> args;
-    // args.push_back(subscription);
-    //
-    // subJson["op"] = "subscribe";
-    // subJson["args"] = args;
-
-    m_subscriptionRequests.push_back(subscription);
+    m_subscriptionRequests.emplace_back(subscriptionRequest);
 }
 
 std::string WebSocketSession::readSubscription() {
@@ -62,15 +55,9 @@ std::string WebSocketSession::readSubscription() {
     }
 
     try {
-        // nlohmann::json subJson = nlohmann::json::parse(m_subscriptionRequests.front());
-        //
-        // for (const auto& argsJson = subJson["args"]; const auto& arg : argsJson) {
-        //     m_subscriptions.push_back(arg);
-        // }
-
-        retVal = m_subscriptionRequests.front();
-    }
-    catch (std::exception& e) {
+        m_subscribing = m_subscriptionRequests.front();
+        retVal = m_subscriptionRequests.front().dump();
+    } catch (std::exception &e) {
         m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, e.what()));
     }
 
@@ -78,64 +65,60 @@ std::string WebSocketSession::readSubscription() {
     return retVal;
 }
 
-bool WebSocketSession::isApiControlMsg(const nlohmann::json& json) {
-    if (json.contains("success")) {
-        return true;
-    }
-
-    return false;
-}
-
-void WebSocketSession::handleApiControlMsg(const nlohmann::json& json) {
-    std::lock_guard lk(m_subscriptionLocker);
-    bool isError = false;
-
-    if (json.contains("success")) {
-        isError = !json["success"];
-    }
-
-    if (json.contains("request") && isError) {
-        std::string operation;
-        const auto& requestJson = json["request"];
-        readValue<std::string>(requestJson, "op", operation);
-
-        for (const auto& argsJson = requestJson["args"]; const std::string arg : argsJson) {
-            if (auto it = std::ranges::find(m_subscriptions, arg); it != m_subscriptions.end()) {
-                m_subscriptions.erase(it);
+bool WebSocketSession::isApiControlMsg(const nlohmann::json &json) {
+    if (json.contains("channel")) {
+        {
+            if (const auto channel = json["channel"].get<std::string>(); channel.find("rs.") != std::string::npos) {
+                return true;
             }
         }
-
-        std::string errorMsg;
-        readValue<std::string>(json, "ret_msg", errorMsg);
-        m_logMessageCB(LogSeverity::Error,
-                       fmt::format("MEXC API Error, operation: {}, message: {}", operation, errorMsg));
     }
-    m_logMessageCB(LogSeverity::Info, fmt::format("MEXC API control msg: {}", json.dump()));
 
+    return false;
 }
 
-void WebSocketSession::subscribe(const std::string& subscriptionFilter) {
-    writeSubscription(subscriptionFilter);
-}
-
-bool WebSocketSession::isSubscribed(const std::string& subscriptionFilter) const {
+void WebSocketSession::handleApiControlMsg(const nlohmann::json &json) {
     std::lock_guard lk(m_subscriptionLocker);
 
-    if (const auto it = std::ranges::find(m_subscriptions, subscriptionFilter); it != m_subscriptions.end()) {
+    if (json.contains("data")) {
+        bool isError = false;
+        isError = json["data"].get<std::string>() != "success";
+
+        if (isError) {
+            if (const auto it = std::ranges::find(m_subscriptions, m_subscribing); it != m_subscriptions.end()) {
+                m_subscriptions.erase(it);
+            }
+
+            m_logMessageCB(LogSeverity::Error,
+                           fmt::format("MEXC API Error, subscription failed {}", m_subscribing.dump()));
+            m_subscribing = nlohmann::json();
+            return;
+        }
+        m_subscriptions.push_back(m_subscribing);
+        m_subscribing = nlohmann::json();
+    }
+
+    m_logMessageCB(LogSeverity::Info, fmt::format("MEXC API control msg: {}", json.dump()));
+}
+
+void WebSocketSession::subscribe(const nlohmann::json &subscriptionRequest) {
+    writeSubscription(subscriptionRequest);
+}
+
+bool WebSocketSession::isSubscribed(const nlohmann::json &subscriptionRequest) const {
+    std::lock_guard lk(m_subscriptionLocker);
+
+    if (const auto it = std::ranges::find(m_subscriptions, subscriptionRequest); it != m_subscriptions.end()) {
         return true;
     }
 
     return false;
 }
 
-void WebSocketSession::run(const std::string& host, const std::string& port, const std::string& subscriptionFilter,
-                           const onDataEvent& dataEventCB) {
-    if (subscriptionFilter.empty()) {
-        throw std::runtime_error("SubscriptionFilter cannot be empty");
-    }
-
+void WebSocketSession::run(const std::string &host, const std::string &port, const nlohmann::json &subscriptionRequest,
+                           const onDataEvent &dataEventCB) {
     m_host = host;
-    writeSubscription(subscriptionFilter);
+    writeSubscription(subscriptionRequest);
     m_dataEventCB = dataEventCB;
 
     /// Look up the domain name
@@ -144,8 +127,8 @@ void WebSocketSession::run(const std::string& host, const std::string& port, con
 }
 
 void
-WebSocketSession::onResolve(const boost::beast::error_code& ec,
-                            const boost::asio::ip::tcp::resolver::results_type& results) {
+WebSocketSession::onResolve(const boost::beast::error_code &ec,
+                            const boost::asio::ip::tcp::resolver::results_type &results) {
     if (ec) {
         return m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, ec.message()));
     }
@@ -160,7 +143,7 @@ WebSocketSession::onResolve(const boost::beast::error_code& ec,
 }
 
 void WebSocketSession::onConnect(boost::beast::error_code ec,
-                                 const boost::asio::ip::tcp::resolver::results_type::endpoint_type& ep) {
+                                 const boost::asio::ip::tcp::resolver::results_type::endpoint_type &ep) {
     if (ec) {
         return m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, ec.message()));
     }
@@ -185,7 +168,7 @@ void WebSocketSession::onConnect(boost::beast::error_code ec,
                                                                        shared_from_this()));
 }
 
-void WebSocketSession::onSSLHandshake(const boost::beast::error_code& ec) {
+void WebSocketSession::onSSLHandshake(const boost::beast::error_code &ec) {
     if (ec) {
         return m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, ec.message()));
     }
@@ -206,7 +189,7 @@ void WebSocketSession::onSSLHandshake(const boost::beast::error_code& ec) {
     m_ws.set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::client));
 
     /// Set a decorator to change the User-Agent of the handshake
-    m_ws.set_option(boost::beast::websocket::stream_base::decorator([](boost::beast::websocket::request_type& req) {
+    m_ws.set_option(boost::beast::websocket::stream_base::decorator([](boost::beast::websocket::request_type &req) {
         req.set(boost::beast::http::field::user_agent,
                 std::string(BOOST_BEAST_VERSION_STRING) + " mexc-client");
     }));
@@ -216,7 +199,7 @@ void WebSocketSession::onSSLHandshake(const boost::beast::error_code& ec) {
                          boost::beast::bind_front_handler(&WebSocketSession::onHandshake, shared_from_this()));
 }
 
-void WebSocketSession::onHandshake(const boost::beast::error_code& ec) {
+void WebSocketSession::onHandshake(const boost::beast::error_code &ec) {
     if (ec) {
         return m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, ec.message()));
     }
@@ -229,7 +212,7 @@ void WebSocketSession::onHandshake(const boost::beast::error_code& ec) {
                      boost::beast::bind_front_handler(&WebSocketSession::onWrite, shared_from_this()));
 }
 
-void WebSocketSession::onWrite(const boost::beast::error_code& ec, std::size_t bytes_transferred) {
+void WebSocketSession::onWrite(const boost::beast::error_code &ec, std::size_t bytes_transferred) {
     boost::ignore_unused(bytes_transferred);
 
     if (ec) {
@@ -240,7 +223,7 @@ void WebSocketSession::onWrite(const boost::beast::error_code& ec, std::size_t b
     m_ws.async_read(m_buffer, boost::beast::bind_front_handler(&WebSocketSession::onRead, shared_from_this()));
 }
 
-void WebSocketSession::onRead(const boost::beast::error_code& ec, std::size_t bytes_transferred) {
+void WebSocketSession::onRead(const boost::beast::error_code &ec, std::size_t bytes_transferred) {
     boost::ignore_unused(bytes_transferred);
 
     if (ec) {
@@ -253,8 +236,8 @@ void WebSocketSession::onRead(const boost::beast::error_code& ec, std::size_t by
         std::string strBuffer;
         strBuffer.reserve(size);
 
-        for (const auto& it : m_buffer.data()) {
-            strBuffer.append(static_cast<const char*>(it.data()), it.size());
+        for (const auto &it: m_buffer.data()) {
+            strBuffer.append(static_cast<const char *>(it.data()), it.size());
         }
 
         m_buffer.consume(m_buffer.size());
@@ -262,8 +245,7 @@ void WebSocketSession::onRead(const boost::beast::error_code& ec, std::size_t by
         if (const nlohmann::json json = nlohmann::json::parse(strBuffer); json.is_object()) {
             if (isApiControlMsg(json)) {
                 handleApiControlMsg(json);
-            }
-            else {
+            } else {
                 try {
                     Event dataEvent;
                     dataEvent.fromJson(json);
@@ -271,8 +253,7 @@ void WebSocketSession::onRead(const boost::beast::error_code& ec, std::size_t by
                     if (m_dataEventCB) {
                         m_dataEventCB(dataEvent);
                     }
-                }
-                catch (std::exception& e) {
+                } catch (std::exception &e) {
                     m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, e.what()));
                 }
             }
@@ -282,8 +263,7 @@ void WebSocketSession::onRead(const boost::beast::error_code& ec, std::size_t by
         if (const auto subscription = readSubscription(); !subscription.empty()) {
             m_ws.async_write(boost::asio::buffer(subscription),
                              boost::beast::bind_front_handler(&WebSocketSession::onWrite, shared_from_this()));
-        }
-        else {
+        } else {
             std::lock_guard lk(m_subscriptionLocker);
             if (m_subscriptions.empty()) {
                 m_logMessageCB(LogSeverity::Warning,
@@ -292,8 +272,7 @@ void WebSocketSession::onRead(const boost::beast::error_code& ec, std::size_t by
             }
             m_ws.async_read(m_buffer, boost::beast::bind_front_handler(&WebSocketSession::onRead, shared_from_this()));
         }
-    }
-    catch (nlohmann::json::exception& e) {
+    } catch (nlohmann::json::exception &e) {
         m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, e.what()));
         m_ws.async_close(boost::beast::websocket::close_code::normal,
                          boost::beast::bind_front_handler(&WebSocketSession::onClose, shared_from_this()));
@@ -308,11 +287,10 @@ void WebSocketSession::ping() {
 
     if (m_ws.is_open()) {
         const boost::beast::websocket::ping_data pingWebSocketFrame;
-        m_ws.async_ping(pingWebSocketFrame, [this](const boost::beast::error_code& ec) {
+        m_ws.async_ping(pingWebSocketFrame, [this](const boost::beast::error_code &ec) {
                             if (ec) {
                                 m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, ec.message()));
-                            }
-                            else {
+                            } else {
                                 m_lastPingTime = std::chrono::system_clock::now();
                             }
                         }
@@ -325,7 +303,7 @@ void WebSocketSession::close() {
                      boost::beast::bind_front_handler(&WebSocketSession::onClose, shared_from_this()));
 }
 
-void WebSocketSession::onClose(const boost::beast::error_code& ec) {
+void WebSocketSession::onClose(const boost::beast::error_code &ec) {
     m_pingTimer.cancel();
 
     if (ec) {
@@ -333,7 +311,7 @@ void WebSocketSession::onClose(const boost::beast::error_code& ec) {
     }
 }
 
-void WebSocketSession::onPingTimer(const boost::beast::error_code& ec) {
+void WebSocketSession::onPingTimer(const boost::beast::error_code &ec) {
     if (ec) {
         return m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, ec.message()));
     }

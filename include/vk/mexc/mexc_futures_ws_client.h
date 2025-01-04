@@ -36,24 +36,24 @@ public:
      */
     void setLoggerCallback(const onLogMessage &onLogMessageCB) const;
 
-    // /**
-    //  * Set Data Message callback
-    //  * @param onDataEventCB
-    //  */
-    // void setDataEventCallback(const onDataEvent &onDataEventCB) const;
+    /**
+     * Set Data Message callback
+     * @param onDataEventCB
+     */
+    void setDataEventCallback(const onDataEvent &onDataEventCB) const;
 
     /**
      * Subscribe WebSocket according to the subscriptionRequest
      * @param subscriptionRequest
      */
-    void subscribe(const std::string &subscriptionRequest) const;
+    void subscribe(const nlohmann::json &subscriptionRequest) const;
 
     /**
      * Check if a stream is already subscribed
      * @param subscriptionRequest subscription request
      * @return True if subscribed
      */
-    [[nodiscard]] bool isSubscribed(const std::string &subscriptionRequest) const;
+    [[nodiscard]] bool isSubscribed(const nlohmann::json &subscriptionRequest) const;
 };
 };
 

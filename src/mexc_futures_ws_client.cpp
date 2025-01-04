@@ -83,11 +83,11 @@ void WSClient::setLoggerCallback(const onLogMessage &onLogMessageCB) const {
     m_p->m_logMessageCB = onLogMessageCB;
 }
 
-// void WSClient::setDataEventCallback(const onDataEvent &onDataEventCB) const {
-//     m_p->m_dataEventCB = onDataEventCB;
-// }
+void WSClient::setDataEventCallback(const onDataEvent &onDataEventCB) const {
+    m_p->m_dataEventCB = onDataEventCB;
+}
 
-void WSClient::subscribe(const std::string &subscriptionRequest) const {
+void WSClient::subscribe(const nlohmann::json &subscriptionRequest) const {
     if (const auto session = m_p->m_session.lock()) {
         session->subscribe(subscriptionRequest);
         return;
@@ -97,9 +97,10 @@ void WSClient::subscribe(const std::string &subscriptionRequest) const {
     std::weak_ptr wp{ws};
     m_p->m_session = std::move(wp);
     ws->run(MEXC_FUTURES_WS_HOST, MEXC_FUTURES_WS_PORT, subscriptionRequest, m_p->m_dataEventCB);
+    run();
 }
 
-bool WSClient::isSubscribed(const std::string &subscriptionRequest) const {
+bool WSClient::isSubscribed(const nlohmann::json &subscriptionRequest) const {
     if (const auto session = m_p->m_session.lock()) {
         return session->isSubscribed(subscriptionRequest);
     }

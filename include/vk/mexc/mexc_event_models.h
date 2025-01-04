@@ -10,7 +10,6 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #define INCLUDE_VK_MEXC_EVENT_MODELS_V5_H
 
 #include "vk/tools/i_json.h"
-#include "vk/mexc/mexc_enums.h"
 #include <nlohmann/json.hpp>
 
 namespace vk::mexc::futures {
@@ -35,12 +34,11 @@ struct WSSubscription final : IJson {
     void fromJson(const nlohmann::json &json) override;
 };
 
-
 struct Event final : IJson {
-//    std::string m_topic{};
-//    ResponseType m_type{ResponseType::snapshot};
-//    std::int64_t m_ts{};
-//    nlohmann::json m_data{};
+    std::string m_channel{};
+    std::string m_symbol{};
+    std::int64_t m_ts{};
+    nlohmann::json m_data{};
 
     ~Event() override = default;
 
