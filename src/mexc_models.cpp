@@ -45,6 +45,13 @@ void TickerPrice::fromJson(const nlohmann::json &json) {
 }
 
 namespace vk::mexc::futures {
+nlohmann::json Response::toJson() const {
+    throw std::runtime_error("Unimplemented: Response::toJson()");
+}
+
+void Response::fromJson(const nlohmann::json &json) {
+}
+
 nlohmann::json FundingRate::toJson() const {
     return Response::toJson();
 }

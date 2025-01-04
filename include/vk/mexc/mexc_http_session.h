@@ -14,7 +14,6 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <boost/beast/http.hpp>
 #include <string>
 #include <map>
-#include <nlohmann/json_fwd.hpp>
 
 namespace vk::mexc {
 
