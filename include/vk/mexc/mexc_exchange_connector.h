@@ -39,7 +39,7 @@ public:
 
     Trade placeOrder(const Order &order) override;
 
-    [[nodiscard]] TickerPrice getSymbolTickerPrice(const std::string &symbol) const override;
+    [[nodiscard]] Ticker getSymbolTicker(const std::string &symbol) const override;
 
     [[nodiscard]] Balance getAccountBalance(const std::string &currency) const override;
 
@@ -47,6 +47,10 @@ public:
 
     [[nodiscard]] std::vector<FundingRate> getFundingRates(const std::string &symbol, std::int64_t startTime,
                                                            std::int64_t endTime) const override;
+
+    void subscribeTickerStream(const std::string &symbol, const onTickerPriceEvent &tickerPriceEventCB) const override;
+
+    void unSubscribeTickerStream(const std::string &symbol) const override;
 
     static std::shared_ptr<IExchangeConnector> createInstance() {
         return std::make_shared<MEXCFuturesExchangeConnector>();

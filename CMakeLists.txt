@@ -13,7 +13,7 @@ endif ()
 
 add_definitions(-DVERBOSE_LOG)
 
-find_package(Boost 1.78 REQUIRED)
+find_package(Boost 1.83 REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)

@@ -30,7 +30,7 @@ nlohmann::json WSSubscriptionParameters::toJson() const {
     return result;
 }
 
-void WSSubscriptionParameters::fromJson(const nlohmann::json &json) {
+void WSSubscriptionParameters::fromJson(const nlohmann::json& json) {
     throw std::runtime_error("Unimplemented: WSSubscription::fromJson()");
 }
 
@@ -41,7 +41,7 @@ nlohmann::json WSSubscription::toJson() const {
     return result;
 }
 
-void WSSubscription::fromJson(const nlohmann::json &json) {
+void WSSubscription::fromJson(const nlohmann::json& json) {
     throw std::runtime_error("Unimplemented: WSSubscription::fromJson()");
 }
 
@@ -49,7 +49,7 @@ nlohmann::json Event::toJson() const {
     throw std::runtime_error("Unimplemented: Event::toJson()");
 }
 
-void Event::fromJson(const nlohmann::json &json) {
+void Event::fromJson(const nlohmann::json& json) {
     readValue<std::string>(json, "channel", m_channel);
     readValue<std::string>(json, "symbol", m_symbol);
     readValue<std::int64_t>(json, "ts", m_ts);
@@ -60,31 +60,28 @@ nlohmann::json EventTicker::toJson() const {
     throw std::runtime_error("Unimplemented: EventTicker::toJson()");
 }
 
-void EventTicker::fromJson(const nlohmann::json &json) {
+void EventTicker::fromJson(const nlohmann::json& json) {
     readValue<std::string>(json, "symbol", m_symbol);
-    m_ask1Price = readStringAsDouble(json, "ask1Price", m_ask1Price);
-    m_ask1Size = readStringAsDouble(json, "ask1Size", m_ask1Size);
-    m_bid1Price = readStringAsDouble(json, "bid1Price", m_bid1Price);
-    m_bid1Size = readStringAsDouble(json, "bid1Size", m_bid1Size);
-    m_lastPrice = readStringAsDouble(json, "lastPrice", m_lastPrice);
-}
-
-void EventTicker::loadEventData(const Event &event) {
-    //    switch (event.m_type) {
-    //    case ResponseType::snapshot:
-    //        fromJson(event.m_data);
-    //        break;
-    //    case ResponseType::delta:
-    //        fromJson(event.m_data);
-    //        break;
-    //    }
+    m_bid1.assign(json["bid1"].get<std::string>());
+    m_ask1.assign(json["ask1"].get<std::string>());
+    m_volume24.assign(json["volume24"].get<std::string>());
+    m_holdVol.assign(json["holdVol"].get<std::string>());
+    m_lower24Price.assign(json["lower24Price"].get<std::string>());
+    m_high24Price.assign(json["high24Price"].get<std::string>());
+    m_riseFallRate.assign(json["riseFallRate"].get<std::string>());
+    m_riseFallValue.assign(json["riseFallValue"].get<std::string>());
+    m_indexPrice.assign(json["indexPrice"].get<std::string>());
+    m_indexPrice.assign(json["indexPrice"].get<std::string>());
+    m_fairPrice.assign(json["fairPrice"].get<std::string>());
+    m_fundingRate.assign(json["fundingRate"].get<std::string>());
+    readValue<std::int64_t>(json, "m_timestamp", m_timestamp);
 }
 
 nlohmann::json EventCandlestick::toJson() const {
     throw std::runtime_error("Unimplemented: EventCandlestick::toJson()");
 }
 
-void EventCandlestick::fromJson(const nlohmann::json &json) {
+void EventCandlestick::fromJson(const nlohmann::json& json) {
     readValue<std::int64_t>(json, "start", m_start);
     readValue<std::int64_t>(json, "end", m_end);
     readValue<std::string>(json, "interval", m_interval);
