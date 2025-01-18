@@ -9,8 +9,8 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #ifndef INCLUDE_VK_MEXC_MODELS_H
 #define INCLUDE_VK_MEXC_MODELS_H
 
+#include "vk/interface/i_json.h"
 #include <nlohmann/json.hpp>
-#include "vk/tools/i_json.h"
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
 namespace vk::mexc::spot {

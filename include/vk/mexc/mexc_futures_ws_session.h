@@ -9,7 +9,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #ifndef INCLUDE_VK_MEXC_WS_SESSION_V5_H
 #define INCLUDE_VK_MEXC_WS_SESSION_V5_H
 
-#include "vk/tools/log_utils.h"
+#include "vk/utils/log_utils.h"
 #include "vk/mexc/mexc_event_models.h"
 #include <memory>
 #include <list>

@@ -11,8 +11,8 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 
 #include <memory>
 
-#include "vk/tools/log_utils.h"
-#include "vk/tools/utils.h"
+#include "vk/utils/log_utils.h"
+#include "vk/utils/utils.h"
 #include "mexc_futures_ws_session.h"
 
 namespace vk::mexc::futures {

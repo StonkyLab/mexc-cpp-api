@@ -11,7 +11,7 @@ if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif ()
 
-add_definitions(-DVERBOSE_LOG)
+add_definitions(-DVERBOSE_LOG -fPIC)
 
 find_package(Boost 1.83 REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -19,10 +19,10 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(magic_enum REQUIRED)
 
-include_directories(include vk_cpp_tools/include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+include_directories(include vk_cpp_common/include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 if (NOT TARGET vk_tools)
-    add_subdirectory(vk_cpp_tools)
+    add_subdirectory(vk_cpp_common)
 endif()
 
 set(HEADERS
@@ -50,8 +50,13 @@ set(SOURCES
         src/mexc_event_models.cpp
 )
 
-add_library(mexc_api OBJECT ${SOURCES} ${HEADERS})
-target_link_libraries(mexc_api PRIVATE OpenSSL::Crypto OpenSSL::SSL vk_tools nlohmann_json::nlohmann_json)
+if (MODULE_MANAGER)
+    add_library(mexc_api MODULE ${SOURCES} ${HEADERS})
+else ()
+    add_library(mexc_api STATIC ${SOURCES} ${HEADERS})
+endif ()
+
+target_link_libraries(mexc_api PRIVATE OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json)
 
 add_executable(test_mexc_api test/main.cpp)
 target_link_libraries(test_mexc_api PRIVATE spdlog::spdlog_header_only mexc_api)

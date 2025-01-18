@@ -10,8 +10,8 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #ifndef INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
 #define INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
 
-#include "vk/tools/i_exchange_connector.h"
-#include "vk/tools/module_factory.h"
+#include "vk/interface/i_exchange_connector.h"
+#include "vk/common/module_factory.h"
 #include <memory>
 #include <magic_enum.hpp>
 
