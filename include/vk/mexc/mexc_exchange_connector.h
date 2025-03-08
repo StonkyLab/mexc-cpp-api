@@ -25,39 +25,33 @@ public:
 
     ~MEXCFuturesExchangeConnector() override;
 
-    [[nodiscard]] std::string name() const override;
-
     [[nodiscard]] std::string version() const override;
 
-    void setLoggerCallback(const onLogMessage &onLogMessageCB) override;
+    [[nodiscard]] std::string name() const override;
 
-    void login(const std::tuple<std::string, std::string, std::string> &credentials) override;
+    void setLoggerCallback(const onLogMessage& onLogMessageCB) override;
 
-    void setDemo(bool demo) override;
+    void login(const std::tuple<std::string, std::string, std::string>& credentials) override;
 
-    [[nodiscard]] bool isDemo() const override;
+    Trade placeOrder(const Order& order) override;
 
-    Trade placeOrder(const Order &order) override;
+    [[nodiscard]] TickerPrice getTickerPrice(const std::string& symbol) const override;
 
-    [[nodiscard]] Ticker getSymbolTicker(const std::string &symbol) const override;
+    [[nodiscard]] Balance getAccountBalance(const std::string& currency) const override;
 
-    [[nodiscard]] Balance getAccountBalance(const std::string &currency) const override;
+    [[nodiscard]] FundingRate getLastFundingRate(const std::string& symbol) const override;
 
-    [[nodiscard]] FundingRate getLastFundingRate(const std::string &symbol) const override;
-
-    [[nodiscard]] std::vector<FundingRate> getFundingRates(const std::string &symbol, std::int64_t startTime,
+    [[nodiscard]] std::vector<FundingRate> getFundingRates(const std::string& symbol, std::int64_t startTime,
                                                            std::int64_t endTime) const override;
 
-    void subscribeTickerStream(const std::string &symbol, const onTickerPriceEvent &tickerPriceEventCB) const override;
-
-    void unSubscribeTickerStream(const std::string &symbol) const override;
+    [[nodiscard]] std::vector<Ticker> getTickerInfo(const std::string& symbol) const override;
 
     static std::shared_ptr<IExchangeConnector> createInstance() {
         return std::make_shared<MEXCFuturesExchangeConnector>();
     }
 };
 
-BOOST_SYMBOL_EXPORT inline IModuleFactory *getModuleFactory() {
+BOOST_SYMBOL_EXPORT inline IModuleFactory* getModuleFactory() {
     if (!g_moduleFactory) {
         FactoryInfo factoryInfo;
         factoryInfo.m_description = std::string(magic_enum::enum_name(ExchangeId::MEXCFutures));
@@ -67,7 +61,8 @@ BOOST_SYMBOL_EXPORT inline IModuleFactory *getModuleFactory() {
         g_moduleFactory->registerClassByName<IExchangeConnector>(
             std::string(magic_enum::enum_name(ExchangeId::MEXCFutures)),
             &MEXCFuturesExchangeConnector::createInstance);
-    } else {
+    }
+    else {
         return nullptr;
     }
 

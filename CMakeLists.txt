@@ -63,3 +63,6 @@ target_link_libraries(test_mexc_api PRIVATE spdlog::spdlog_header_only mexc_api)
 
 add_executable(test_mexc_ws_api test/ws_main.cpp)
 target_link_libraries(test_mexc_ws_api PRIVATE spdlog::spdlog_header_only mexc_api)
+
+add_executable(test_mexc_connector test/connector.cpp)
+target_link_libraries(test_mexc_connector PRIVATE spdlog::spdlog_header_only mexc_api)

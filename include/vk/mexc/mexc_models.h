@@ -70,6 +70,13 @@ struct FundingRate final : Response {
 
     void fromJson(const nlohmann::json &json) override;
 };
-}
 
+struct Contract final : Response {
+    std::string m_symbol{};
+    std::string m_displayName{};
+    std::string m_baseCoin{};
+    std::string q_quoteCoin{};
+    std::string m_settleCoin{};
+};
+}
 #endif // INCLUDE_VK_MEXC_MODELS_H

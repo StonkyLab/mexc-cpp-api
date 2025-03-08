@@ -32,4 +32,8 @@ void RESTClient::setCredentials(const std::string &apiKey, const std::string &ap
     m_p->m_httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
 }
 
+std::vector<Contract> RESTClient::getContracts() const {
+    // TODO: Implement me!
+    return {};
+}
 }
