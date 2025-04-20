@@ -11,7 +11,8 @@ if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif ()
 
-add_definitions(-DVERBOSE_LOG)
+SET(MODULE_MANAGER ON)
+add_definitions(-fPIC -DVERBOSE_LOG)
 
 find_package(Boost 1.78 REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -50,11 +51,11 @@ set(SOURCES
         src/mexc_event_models.cpp
 )
 
-add_library(mexc_api OBJECT ${SOURCES} ${HEADERS})
-target_link_libraries(mexc_api PRIVATE OpenSSL::Crypto OpenSSL::SSL vk_tools nlohmann_json::nlohmann_json)
+add_library(mexc_api SHARED ${SOURCES} ${HEADERS})
+target_link_libraries(mexc_api PRIVATE OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json)
 
 add_executable(test_mexc_api test/main.cpp)
-target_link_libraries(test_mexc_api PRIVATE spdlog::spdlog_header_only mexc_api)
+target_link_libraries(test_mexc_api PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
 
 add_executable(test_mexc_ws_api test/ws_main.cpp)
-target_link_libraries(test_mexc_ws_api PRIVATE spdlog::spdlog_header_only mexc_api)
+target_link_libraries(test_mexc_ws_api PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)

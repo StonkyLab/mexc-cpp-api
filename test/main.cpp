@@ -1,13 +1,13 @@
 #include "vk/mexc/mexc.h"
 #include "vk/mexc/mexc_spot_rest_client.h"
-#include "vk/tools/json_utils.h"
+#include "vk/utils/json_utils.h"
 #include <memory>
 #include <fstream>
 #include <thread>
 #include <spdlog/spdlog.h>
 #include <future>
 #include "vk/mexc/mexc_enums.h"
-#include "vk/tools/utils.h"
+#include "vk/utils/utils.h"
 
 using namespace vk::mexc;
 using namespace std::chrono_literals;
