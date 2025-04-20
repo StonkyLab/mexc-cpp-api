@@ -10,7 +10,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/utils/utils.h"
 #include "vk/utils/json_utils.h"
 
-namespace vk::mexc::spot {
+namespace vk::mexc {
 nlohmann::json ServerTime::toJson() const {
     throw std::runtime_error("Unimplemented: ServerTime::toJson()");
 }

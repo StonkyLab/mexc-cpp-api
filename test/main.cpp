@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 
 constexpr int HISTORY_LENGTH_IN_S = 86400 * 7; // 7 days
 
-bool checkCandles(const std::vector<spot::Candle>& candles, const CandleInterval interval) {
+bool checkCandles(const std::vector<Candle>& candles, const CandleInterval interval) {
     const auto mSecs = MEXC::numberOfMsForCandleInterval(interval);
 
     for (auto i = 0; i < candles.size() - 1; i++) {
@@ -26,7 +26,7 @@ bool checkCandles(const std::vector<spot::Candle>& candles, const CandleInterval
     return true;
 }
 
-void saveCandles(const std::vector<spot::Candle>& candles, const std::string& filePath) {
+void saveCandles(const std::vector<Candle>& candles, const std::string& filePath) {
     if (std::ofstream file(filePath); !file.is_open()) {
         spdlog::error("Failed to open file {}", filePath);
     }

@@ -13,7 +13,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/interface/i_json.h"
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
-namespace vk::mexc::spot {
+namespace vk::mexc {
 struct ServerTime final : IJson {
     std::int64_t m_serverTime{};
 
