@@ -11,6 +11,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 
 #include "vk/interface/i_json.h"
 #include <nlohmann/json.hpp>
+#include <boost/multiprecision/cpp_dec_float.hpp>
 
 namespace vk::mexc::futures {
 
@@ -49,17 +50,22 @@ struct Event final : IJson {
 
 struct EventTicker final : IJson {
     std::string m_symbol{};
-    double m_ask1Price{};
-    double m_ask1Size{};
-    double m_bid1Price{};
-    double m_bid1Size{};
-    double m_lastPrice{};
+    boost::multiprecision::cpp_dec_float_50 m_bid1{};
+    boost::multiprecision::cpp_dec_float_50 m_ask1{};
+    boost::multiprecision::cpp_dec_float_50 m_volume24{};
+    boost::multiprecision::cpp_dec_float_50 m_holdVol{};
+    boost::multiprecision::cpp_dec_float_50 m_lower24Price{};
+    boost::multiprecision::cpp_dec_float_50 m_high24Price{};
+    boost::multiprecision::cpp_dec_float_50 m_riseFallRate{};
+    boost::multiprecision::cpp_dec_float_50 m_riseFallValue{};
+    boost::multiprecision::cpp_dec_float_50 m_indexPrice{};
+    boost::multiprecision::cpp_dec_float_50 m_fairPrice{};
+    boost::multiprecision::cpp_dec_float_50 m_fundingRate{};
+    std::int64_t m_timestamp{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
     void fromJson(const nlohmann::json& json) override;
-
-    void loadEventData(const Event& event);
 };
 
 struct EventCandlestick final : IJson {

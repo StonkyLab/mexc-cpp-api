@@ -25,6 +25,8 @@ public:
     ~RESTClient();
 
     void setCredentials(const std::string &apiKey, const std::string &apiSecret) const;
+
+    [[nodiscard]] std::vector<Contract> getContracts() const;
 };
 }
 
