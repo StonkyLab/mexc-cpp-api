@@ -20,10 +20,10 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(magic_enum REQUIRED)
 
-include_directories(include vk_cpp_tools/include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+include_directories(include vk_cpp_common/include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
-if (NOT TARGET vk_tools)
-    add_subdirectory(vk_cpp_tools)
+if (NOT TARGET vk_common)
+    add_subdirectory(vk_cpp_common)
 endif()
 
 set(HEADERS
