@@ -32,6 +32,17 @@ void RESTClient::setCredentials(const std::string &apiKey, const std::string &ap
     m_p->m_httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
 }
 
+std::int64_t RESTClient::getServerTime() const {
+    // const std::string path = "/v1/contract/ping";
+    // const std::map<std::string, std::string> parameters;
+    //
+    // const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters));
+    // const auto timeResponse = handleBybitResponse<ServerTime>(response);
+    //
+    // return timeResponse.m_timeNano / 1000000;
+    return 0;
+}
+
 // std::vector<Contract> RESTClient::getContracts() const {
 //     // TODO: Implement me!
 //     return {};

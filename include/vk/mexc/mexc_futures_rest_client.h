@@ -26,6 +26,13 @@ public:
 
     void setCredentials(const std::string &apiKey, const std::string &apiSecret) const;
 
+    /**
+     * Returns server time in ms
+     * @return timestamp in ms
+     * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#get-the-server-time
+    */
+    [[nodiscard]] std::int64_t getServerTime() const;
+
     //[[nodiscard]] std::vector<Contract> getContracts() const;
 };
 }
