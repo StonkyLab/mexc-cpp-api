@@ -5,16 +5,15 @@ set(CMAKE_CXX_STANDARD 20)
 
 if (MSVC)
     add_definitions(-D_WIN32_WINNT=0x0A00 /bigobj)
+else ()
+    add_definitions(-fPIC)
 endif ()
 
 if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif ()
 
-SET(MODULE_MANAGER ON)
-add_definitions(-fPIC -DVERBOSE_LOG)
-
-find_package(Boost 1.78 REQUIRED)
+find_package(Boost 1.83 REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
@@ -51,11 +50,16 @@ set(SOURCES
         src/mexc_event_models.cpp
 )
 
-add_library(mexc_api SHARED ${SOURCES} ${HEADERS})
+if (MODULE_MANAGER)
+    add_library(mexc_api SHARED ${SOURCES} ${HEADERS})
+else ()
+    add_library(mexc_api STATIC ${SOURCES} ${HEADERS})
+
+    add_executable(test_mexc_api test/main.cpp)
+    target_link_libraries(test_mexc_api PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
+
+    add_executable(test_mexc_ws_api test/ws_main.cpp)
+    target_link_libraries(test_mexc_ws_api PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
+endif ()
+
 target_link_libraries(mexc_api PRIVATE OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json)
-
-add_executable(test_mexc_api test/main.cpp)
-target_link_libraries(test_mexc_api PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
-
-add_executable(test_mexc_ws_api test/ws_main.cpp)
-target_link_libraries(test_mexc_ws_api PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
