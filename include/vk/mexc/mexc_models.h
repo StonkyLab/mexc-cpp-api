@@ -13,7 +13,8 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/interface/i_json.h"
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
-namespace vk::mexc {
+namespace vk::mexc::spot {
+
 struct ServerTime final : IJson {
     std::int64_t m_serverTime{};
 
@@ -51,6 +52,15 @@ namespace vk::mexc::futures {
 struct Response : IJson {
     int m_code{};
     bool m_success{};
+    nlohmann::json m_data{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct ServerTime final : Response {
+    std::int64_t m_serverTime{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -70,6 +80,15 @@ struct FundingRate final : Response {
 
     void fromJson(const nlohmann::json &json) override;
 };
+
+struct FundingRates final : Response {
+    std::vector<FundingRate> m_fundingRates{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
 }
 
 #endif // INCLUDE_VK_MEXC_MODELS_H

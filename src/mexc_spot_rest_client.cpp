@@ -15,18 +15,6 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <mutex>
 
 namespace vk::mexc::spot {
-template <typename ValueType>
-ValueType handleMEXCResponse(const http::response<http::string_body>& response) {
-    ValueType retVal;
-    retVal.fromJson(nlohmann::json::parse(response.body()));
-
-    if (retVal.m_retCode != 0) {
-        throw std::runtime_error(
-            fmt::format("MEXC API error, code: {}, msg: {}", retVal.m_retCode, retVal.m_retMsg).c_str());
-    }
-
-    return retVal;
-}
 
 struct RESTClient::P {
 private:
@@ -41,7 +29,7 @@ public:
     }
 
     static http::response<http::string_body> checkResponse(const http::response<http::string_body>& response) {
-        if (response.result() != boost::beast::http::status::ok) {
+        if (response.result() != http::status::ok) {
             throw std::runtime_error(
                 fmt::format("Bad response, code {}, msg: {}", response.result_int(), response.body()).c_str());
         }
@@ -87,8 +75,8 @@ void RESTClient::setCredentials(const std::string& apiKey, const std::string& ap
     m_p->m_httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
 }
 
-std::vector<Candle> RESTClient::getHistoricalPrices(const std::string& symbol, CandleInterval interval,
-                                                    std::int64_t startTime, const std::int64_t endTime,
+std::vector<Candle> RESTClient::getHistoricalPrices(const std::string& symbol, const CandleInterval interval,
+                                                    const std::int64_t startTime, const std::int64_t endTime,
                                                     const std::int32_t limit) const {
     std::vector<Candle> retVal;
     std::int64_t lastFromTime = startTime;

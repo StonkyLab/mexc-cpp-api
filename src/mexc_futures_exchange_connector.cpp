@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
-#include <vk/mexc/mexc_exchange_connector.h>
+#include <vk/mexc/mexc_futures_exchange_connector.h>
 #include "vk/mexc/mexc_futures_rest_client.h"
 
 namespace vk {
@@ -29,51 +29,58 @@ std::string MEXCFuturesExchangeConnector::version() const {
     return "1.0.4";
 }
 
-void MEXCFuturesExchangeConnector::setLoggerCallback(const onLogMessage &onLogMessageCB) {
+void MEXCFuturesExchangeConnector::setLoggerCallback(const onLogMessage& onLogMessageCB) {
 }
 
-void MEXCFuturesExchangeConnector::login(const std::tuple<std::string, std::string, std::string> &credentials) {
+void MEXCFuturesExchangeConnector::login(const std::tuple<std::string, std::string, std::string>& credentials) {
     m_p->restClient.reset();
     m_p->restClient = std::make_shared<mexc::futures::RESTClient>(std::get<0>(credentials),
                                                                   std::get<1>(credentials));
 }
 
-Trade MEXCFuturesExchangeConnector::placeOrder(const Order &order) {
+Trade MEXCFuturesExchangeConnector::placeOrder(const Order& order) {
     Trade retVal;
     throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::placeOrder");
 }
 
-TickerPrice MEXCFuturesExchangeConnector::getTickerPrice(const std::string &symbol) const {
+TickerPrice MEXCFuturesExchangeConnector::getTickerPrice(const std::string& symbol) const {
     TickerPrice retVal;
     throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getTickerPrice");
 }
 
-Balance MEXCFuturesExchangeConnector::getAccountBalance(const std::string &currency) const {
+Balance MEXCFuturesExchangeConnector::getAccountBalance(const std::string& currency) const {
     Balance retVal;
     throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getAccountBalance");
 }
 
-FundingRate MEXCFuturesExchangeConnector::getLastFundingRate(const std::string &symbol) const {
-    // const auto fr = m_p->restClient->getLastFundingRate(symbol);
-    // return {fr.m_symbol, fr.m_fundingRate, fr.m_fundingTime};
-    return {};
+FundingRate MEXCFuturesExchangeConnector::getFundingRate(const std::string& symbol) const {
+    const auto mexcFr = m_p->restClient->getContractFundingRate(symbol);
+    FundingRate fr;
+    fr.symbol = mexcFr.m_symbol;
+    fr.fundingRate = mexcFr.m_fundingRate.convert_to<double>();
+    fr.fundingTime = mexcFr.m_nextSettleTime;
+    return fr;
 }
 
-std::vector<FundingRate> MEXCFuturesExchangeConnector::getFundingRates(
-    const std::string &symbol, const std::int64_t startTime, const std::int64_t endTime) const {
+std::vector<FundingRate> MEXCFuturesExchangeConnector::getFundingRates() const {
     std::vector<FundingRate> retVal;
-    //
-    // for (const auto fRates = m_p->restClient->getFundingRates(symbol, startTime, endTime); const auto& fr: fRates) {
-    //     retVal.push_back({fr.m_symbol, fr.m_fundingRate, fr.m_fundingTime, {}});
-    // }
+
+    for (const auto& rate : m_p->restClient->getContractFundingRates()) {
+        FundingRate fr;
+        fr.symbol = rate.m_symbol;
+        fr.fundingRate = rate.m_fundingRate.convert_to<double>();
+        fr.fundingTime = rate.m_nextSettleTime;
+        retVal.push_back(fr);
+    }
+
     return retVal;
 }
 
-std::vector<Ticker> MEXCFuturesExchangeConnector::getTickerInfo(const std::string &symbol) const {
+std::vector<Ticker> MEXCFuturesExchangeConnector::getTickerInfo(const std::string& symbol) const {
     throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getTickerInfo");
 }
 
 std::int64_t MEXCFuturesExchangeConnector::getServerTime() const {
-    //m_p->restClient.
+    return m_p->restClient->getServerTime();
 }
 }

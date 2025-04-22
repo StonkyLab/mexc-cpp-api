@@ -38,10 +38,9 @@ public:
 
     [[nodiscard]] Balance getAccountBalance(const std::string &currency) const override;
 
-    [[nodiscard]] FundingRate getLastFundingRate(const std::string &symbol) const override;
+    [[nodiscard]] FundingRate getFundingRate(const std::string &symbol) const override;
 
-    [[nodiscard]] std::vector<FundingRate> getFundingRates(const std::string &symbol, std::int64_t startTime,
-                                                           std::int64_t endTime) const override;
+    [[nodiscard]] std::vector<FundingRate> getFundingRates() const override;
 
     [[nodiscard]] std::vector<Ticker> getTickerInfo(const std::string& symbol) const override;
 

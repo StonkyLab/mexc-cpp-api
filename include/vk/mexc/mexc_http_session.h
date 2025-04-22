@@ -27,7 +27,7 @@ class HTTPSession {
     std::unique_ptr<P> m_p{};
 
 public:
-    HTTPSession(const std::string &apiKey, const std::string &apiSecret);
+    HTTPSession(const std::string &apiKey, const std::string &apiSecret, bool futures = false);
 
     ~HTTPSession();
 

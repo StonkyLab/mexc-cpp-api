@@ -15,7 +15,8 @@ namespace vk::mexc {
 namespace ssl = boost::asio::ssl;
 using tcp = net::ip::tcp;
 
-auto API_URI = "api.mexc.com";
+auto API_URI_SPOT = "api.mexc.com";
+auto API_URI_FUTURES = "contract.mexc.com";
 
 struct HTTPSession::P {
     net::io_context m_ioc;
@@ -26,10 +27,10 @@ struct HTTPSession::P {
 
     http::response<http::string_body> request(http::request<http::string_body> req);
 
-    static std::string createQueryStr(const std::map<std::string, std::string> &parameters) {
+    static std::string createQueryStr(const std::map<std::string, std::string>& parameters) {
         std::string queryStr;
 
-        for (const auto & [fst, snd]: parameters) {
+        for (const auto& [fst, snd] : parameters) {
             queryStr.append(fst);
             queryStr.append("=");
             queryStr.append(snd);
@@ -43,15 +44,24 @@ struct HTTPSession::P {
     }
 };
 
-HTTPSession::HTTPSession(const std::string& apiKey, const std::string& apiSecret) : m_p(std::make_unique<P>()) {
-    m_p->m_uri = API_URI;
+HTTPSession::HTTPSession(const std::string& apiKey, const std::string& apiSecret, const bool futures) : m_p(
+    std::make_unique<P>()) {
+
+    if (futures) {
+        m_p->m_uri = API_URI_FUTURES;
+    }
+    else {
+        m_p->m_uri = API_URI_SPOT;
+    }
+
     m_p->m_apiKey = apiKey;
     m_p->m_apiSecret = apiSecret;
 }
 
 HTTPSession::~HTTPSession() = default;
 
-http::response<http::string_body> HTTPSession::methodGet(const std::string& path, const std::map<std::string, std::string> &parameters) const {
+http::response<http::string_body> HTTPSession::methodGet(const std::string& path,
+                                                         const std::map<std::string, std::string>& parameters) const {
     std::string finalPath = path;
 
     if (const auto queryString = P::createQueryStr(parameters); !queryString.empty()) {

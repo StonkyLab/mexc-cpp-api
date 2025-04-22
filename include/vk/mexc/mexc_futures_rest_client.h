@@ -33,6 +33,20 @@ public:
     */
     [[nodiscard]] std::int64_t getServerTime() const;
 
+    /**
+     * Returns contract funding rate
+     * @return FundingRate
+     * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#get-contract-funding-rate
+    */
+    [[nodiscard]] FundingRate getContractFundingRate(const std::string &contract) const;
+
+    /**
+     * Returns funding rates for all contracts
+     * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#get-contract-funding-rate
+     * @return vector of FundingRate structures
+     */
+    [[nodiscard]] std::vector<FundingRate> getContractFundingRates() const;
+
     //[[nodiscard]] std::vector<Contract> getContracts() const;
 };
 }

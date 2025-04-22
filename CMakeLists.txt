@@ -32,7 +32,7 @@ set(HEADERS
         include/vk/mexc/mexc_models.h
         include/vk/mexc/mexc_spot_rest_client.h
         include/vk/mexc/mexc_futures_rest_client.h
-        include/vk/mexc/mexc_exchange_connector.h
+        include/vk/mexc/mexc_futures_exchange_connector.h
         include/vk/mexc/mexc_futures_ws_session.h
         include/vk/mexc/mexc_futures_ws_client.h
         include/vk/mexc/mexc_event_models.h
@@ -44,7 +44,7 @@ set(SOURCES
         src/mexc_models.cpp
         src/mexc_spot_rest_client.cpp
         src/mexc_futures_rest_client.cpp
-        src/mexc_exchange_connector.cpp
+        src/mexc_futures_exchange_connector.cpp
         src/mexc_futures_ws_client.cpp
         src/mexc_futures_ws_session.cpp
         src/mexc_event_models.cpp
@@ -55,8 +55,11 @@ if (MODULE_MANAGER)
 else ()
     add_library(mexc_api STATIC ${SOURCES} ${HEADERS})
 
-    add_executable(test_mexc_api test/main.cpp)
-    target_link_libraries(test_mexc_api PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
+    add_executable(test_mexc_api_spot test/main_spot.cpp)
+    target_link_libraries(test_mexc_api_spot PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
+
+    add_executable(test_mexc_api_futures test/main_futures.cpp)
+    target_link_libraries(test_mexc_api_futures PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
 
     add_executable(test_mexc_ws_api test/ws_main.cpp)
     target_link_libraries(test_mexc_ws_api PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
