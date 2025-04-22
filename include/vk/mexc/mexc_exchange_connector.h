@@ -16,14 +16,14 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <magic_enum.hpp>
 
 namespace vk {
-class MEXCFuturesExchangeConnector final : public IExchangeConnector {
+class OKXFuturesExchangeConnector final : public IExchangeConnector {
     struct P;
     std::unique_ptr<P> m_p{};
 
 public:
-    MEXCFuturesExchangeConnector();
+    OKXFuturesExchangeConnector();
 
-    ~MEXCFuturesExchangeConnector() override;
+    ~OKXFuturesExchangeConnector() override;
 
     [[nodiscard]] std::string name() const override;
 
@@ -47,7 +47,7 @@ public:
     [[nodiscard]] std::vector<Ticker> getTickerInfo(const std::string& symbol) const override;
 
     static std::shared_ptr<IExchangeConnector> createInstance() {
-        return std::make_shared<MEXCFuturesExchangeConnector>();
+        return std::make_shared<OKXFuturesExchangeConnector>();
     }
 };
 
@@ -60,7 +60,7 @@ BOOST_SYMBOL_EXPORT IModuleFactory *getModuleFactory() {
         g_moduleFactory = new ModuleFactory(factoryInfo);
         g_moduleFactory->registerClassByName<IExchangeConnector>(
             std::string(magic_enum::enum_name(ExchangeId::MEXCFutures)),
-            &MEXCFuturesExchangeConnector::createInstance);
+            &OKXFuturesExchangeConnector::createInstance);
     } else {
         return nullptr;
     }
