@@ -24,21 +24,21 @@ public:
 
     ~MEXCFuturesExchangeConnector() override;
 
-    [[nodiscard]] std::string name() const override;
+    [[nodiscard]] std::string exchangeId() const override;
 
     [[nodiscard]] std::string version() const override;
 
-    void setLoggerCallback(const onLogMessage &onLogMessageCB) override;
+    void setLoggerCallback(const onLogMessage& onLogMessageCB) override;
 
-    void login(const std::tuple<std::string, std::string, std::string> &credentials) override;
+    void login(const std::tuple<std::string, std::string, std::string>& credentials) override;
 
-    Trade placeOrder(const Order &order) override;
+    Trade placeOrder(const Order& order) override;
 
-    [[nodiscard]] TickerPrice getTickerPrice(const std::string &symbol) const override;
+    [[nodiscard]] TickerPrice getTickerPrice(const std::string& symbol) const override;
 
-    [[nodiscard]] Balance getAccountBalance(const std::string &currency) const override;
+    [[nodiscard]] Balance getAccountBalance(const std::string& currency) const override;
 
-    [[nodiscard]] FundingRate getFundingRate(const std::string &symbol) const override;
+    [[nodiscard]] FundingRate getFundingRate(const std::string& symbol) const override;
 
     [[nodiscard]] std::vector<FundingRate> getFundingRates() const override;
 
@@ -51,17 +51,18 @@ public:
     }
 };
 
-BOOST_SYMBOL_EXPORT IModuleFactory *getModuleFactory() {
+BOOST_SYMBOL_EXPORT IModuleFactory* getModuleFactory() {
     if (!g_moduleFactory) {
         FactoryInfo factoryInfo;
-        factoryInfo.m_description = std::string(magic_enum::enum_name(ExchangeId::MEXCFutures));
-        factoryInfo.m_version = "1.0.4";
+        factoryInfo.m_id = std::string(magic_enum::enum_name(ExchangeId::MEXCFutures));
+        factoryInfo.m_description = "MEXC CEX - Futures";
 
         g_moduleFactory = new ModuleFactory(factoryInfo);
         g_moduleFactory->registerClassByName<IExchangeConnector>(
             std::string(magic_enum::enum_name(ExchangeId::MEXCFutures)),
             &MEXCFuturesExchangeConnector::createInstance);
-    } else {
+    }
+    else {
         return nullptr;
     }
 

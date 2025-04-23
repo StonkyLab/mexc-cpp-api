@@ -21,7 +21,7 @@ MEXCFuturesExchangeConnector::~MEXCFuturesExchangeConnector() {
     m_p->restClient.reset();
 }
 
-std::string MEXCFuturesExchangeConnector::name() const {
+std::string MEXCFuturesExchangeConnector::exchangeId() const {
     return std::string(magic_enum::enum_name(ExchangeId::MEXCFutures));
 }
 
