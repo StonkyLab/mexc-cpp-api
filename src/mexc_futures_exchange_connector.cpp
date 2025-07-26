@@ -11,14 +11,15 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 
 namespace vk {
 struct MEXCFuturesExchangeConnector::P {
-    std::shared_ptr<mexc::futures::RESTClient> restClient{};
+    std::unique_ptr<mexc::futures::RESTClient> m_restClient{};
 };
 
 MEXCFuturesExchangeConnector::MEXCFuturesExchangeConnector() : m_p(std::make_unique<P>()) {
+    m_p->m_restClient = std::make_unique<mexc::futures::RESTClient>("","");
 }
 
 MEXCFuturesExchangeConnector::~MEXCFuturesExchangeConnector() {
-    m_p->restClient.reset();
+    m_p->m_restClient.reset();
 }
 
 std::string MEXCFuturesExchangeConnector::exchangeId() const {
@@ -33,8 +34,8 @@ void MEXCFuturesExchangeConnector::setLoggerCallback(const onLogMessage& onLogMe
 }
 
 void MEXCFuturesExchangeConnector::login(const std::tuple<std::string, std::string, std::string>& credentials) {
-    m_p->restClient.reset();
-    m_p->restClient = std::make_shared<mexc::futures::RESTClient>(std::get<0>(credentials),
+    m_p->m_restClient.reset();
+    m_p->m_restClient = std::make_unique<mexc::futures::RESTClient>(std::get<0>(credentials),
                                                                   std::get<1>(credentials));
 }
 
@@ -54,14 +55,14 @@ Balance MEXCFuturesExchangeConnector::getAccountBalance(const std::string& curre
 }
 
 FundingRate MEXCFuturesExchangeConnector::getFundingRate(const std::string& symbol) const {
-    const auto fr = m_p->restClient->getContractFundingRate(symbol);
+    const auto fr = m_p->m_restClient->getContractFundingRate(symbol);
     return {fr.m_symbol,fr.m_fundingRate.convert_to<double>(), fr.m_nextSettleTime};
 }
 
 std::vector<FundingRate> MEXCFuturesExchangeConnector::getFundingRates() const {
     std::vector<FundingRate> retVal;
 
-    for (const auto& rate : m_p->restClient->getContractFundingRates()) {
+    for (const auto& rate : m_p->m_restClient->getContractFundingRates()) {
         FundingRate fr;
         fr.symbol = rate.m_symbol;
         fr.fundingRate = rate.m_fundingRate.convert_to<double>();
@@ -77,6 +78,6 @@ std::vector<Ticker> MEXCFuturesExchangeConnector::getTickerInfo(const std::strin
 }
 
 std::int64_t MEXCFuturesExchangeConnector::getServerTime() const {
-    return m_p->restClient->getServerTime();
+    return m_p->m_restClient->getServerTime();
 }
 }
