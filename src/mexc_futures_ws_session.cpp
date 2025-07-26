@@ -317,7 +317,7 @@ void WebSocketSession::onPingTimer(const boost::beast::error_code &ec) {
     }
 
     ping();
-    m_pingTimer.expires_from_now(boost::asio::chrono::seconds(PING_INTERVAL_IN_S));
+    m_pingTimer.expires_after(boost::asio::chrono::seconds(PING_INTERVAL_IN_S));
     m_pingTimer.async_wait(boost::beast::bind_front_handler(&WebSocketSession::onPingTimer, shared_from_this()));
 }
 }
