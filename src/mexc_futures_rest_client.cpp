@@ -69,4 +69,10 @@ std::vector<FundingRate> RESTClient::getContractFundingRates() const {
     const auto response = P::checkResponse(m_p->m_httpSession->methodGet(path,{}));
     return handleMEXCResponse<FundingRates>(response).m_fundingRates;
 }
+
+WalletBalance RESTClient::getWalletBalance(const std::string &currency) const {
+    const std::string path = "/api/v1/private/account/asset/" + currency;
+    const auto response = P::checkResponse(m_p->m_httpSession->methodGet(path,{}, false));
+    return handleMEXCResponse<WalletBalance>(response);
+}
 }

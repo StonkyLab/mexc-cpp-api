@@ -4,7 +4,7 @@ project(mexc_api)
 set(CMAKE_CXX_STANDARD 20)
 
 if (MSVC)
-    add_definitions(-D_WIN32_WINNT=0x0A00 /bigobj)
+    add_definitions(-D_WIN32_WINNT=0x0A00 /bigobj /utf-8 -DVERBOSE_LOG)
 else ()
     add_definitions(-fPIC)
 endif ()
@@ -36,6 +36,7 @@ set(HEADERS
         include/vk/mexc/mexc_futures_ws_session.h
         include/vk/mexc/mexc_futures_ws_client.h
         include/vk/mexc/mexc_event_models.h
+        include/vk/mexc/mexc_ws_stream_manager.h
 )
 
 set(SOURCES
@@ -48,6 +49,7 @@ set(SOURCES
         src/mexc_futures_ws_client.cpp
         src/mexc_futures_ws_session.cpp
         src/mexc_event_models.cpp
+        src/mexc_ws_stream_manager.cpp
 )
 
 if (MODULE_MANAGER)

@@ -56,19 +56,20 @@ Balance MEXCFuturesExchangeConnector::getAccountBalance(const std::string& curre
 
 FundingRate MEXCFuturesExchangeConnector::getFundingRate(const std::string& symbol) const {
     const auto fr = m_p->m_restClient->getContractFundingRate(symbol);
-    return {fr.m_symbol,fr.m_fundingRate.convert_to<double>(), fr.m_nextSettleTime};
+    //return {fr.m_symbol,fr.m_fundingRate.convert_to<double>(), fr.m_nextSettleTime};
+    return {};
 }
 
 std::vector<FundingRate> MEXCFuturesExchangeConnector::getFundingRates() const {
     std::vector<FundingRate> retVal;
 
-    for (const auto& rate : m_p->m_restClient->getContractFundingRates()) {
-        FundingRate fr;
-        fr.symbol = rate.m_symbol;
-        fr.fundingRate = rate.m_fundingRate.convert_to<double>();
-        fr.fundingTime = rate.m_nextSettleTime;
-        retVal.push_back(fr);
-    }
+    // for (const auto& rate : m_p->m_restClient->getContractFundingRates()) {
+    //     FundingRate fr;
+    //     fr.symbol = rate.m_symbol;
+    //     fr.fundingRate = rate.m_fundingRate.convert_to<double>();
+    //     fr.fundingTime = rate.m_nextSettleTime;
+    //     retVal.push_back(fr);
+    // }
 
     return retVal;
 }

@@ -31,7 +31,7 @@ public:
 
     ~HTTPSession();
 
-    [[nodiscard]] http::response<http::string_body> methodGet(const std::string &path, const std::map<std::string, std::string> &parameters) const;
+    [[nodiscard]] http::response<http::string_body> methodGet(const std::string &path, const std::map<std::string, std::string> &parameters, bool isPublic = true) const;
 };
 }
 #endif // INCLUDE_VK_MEXC_HTTP_SESSION_H

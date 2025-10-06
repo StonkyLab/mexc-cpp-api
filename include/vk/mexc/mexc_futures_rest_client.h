@@ -16,38 +16,44 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 
 namespace vk::mexc::futures {
 class RESTClient {
-    struct P;
-    std::unique_ptr<P> m_p{};
+	struct P;
+	std::unique_ptr<P> m_p{};
 
 public:
-    RESTClient(const std::string &apiKey, const std::string &apiSecret);
+	RESTClient(const std::string &apiKey, const std::string &apiSecret);
 
-    ~RESTClient();
+	~RESTClient();
 
-    void setCredentials(const std::string &apiKey, const std::string &apiSecret) const;
+	void setCredentials(const std::string &apiKey, const std::string &apiSecret) const;
 
-    /**
-     * Returns server time in ms
-     * @return timestamp in ms
-     * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#get-the-server-time
-    */
-    [[nodiscard]] std::int64_t getServerTime() const;
+	/**
+	 * Returns server time in ms
+	 * @return timestamp in ms
+	 * @see https://www.mexc.com/api-docs/futures/market-endpoints#get-the-server-time
+	*/
+	[[nodiscard]] std::int64_t getServerTime() const;
 
-    /**
-     * Returns contract funding rate
-     * @return FundingRate
-     * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#get-contract-funding-rate
-    */
-    [[nodiscard]] FundingRate getContractFundingRate(const std::string &contract) const;
+	/**
+	 * Returns contract funding rate
+	 * @return FundingRate
+	 * @see https://www.mexc.com/api-docs/futures/market-endpoints#get-contract-funding-rate
+	*/
+	[[nodiscard]] FundingRate getContractFundingRate(const std::string &contract) const;
 
-    /**
-     * Returns funding rates for all contracts
-     * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#get-contract-funding-rate
-     * @return vector of FundingRate structures
-     */
-    [[nodiscard]] std::vector<FundingRate> getContractFundingRates() const;
+	/**
+	 * Returns funding rates for all contracts
+	 * @see https://www.mexc.com/api-docs/futures/market-endpoints#get-contract-funding-rate
+	 * @return vector of FundingRate structures
+	 */
+	[[nodiscard]] std::vector<FundingRate> getContractFundingRates() const;
 
-    //[[nodiscard]] std::vector<Contract> getContracts() const;
+	/**
+	 * Get the user's single currency asset information
+	 * @see https://www.mexc.com/api-docs/futures/account-and-trading-endpoints#get-the-users-single-currency-asset-information
+	 * @param currency
+	 * @return WalletBalance
+	 */
+	[[nodiscard]] WalletBalance getWalletBalance(const std::string &currency) const;
 };
 }
 

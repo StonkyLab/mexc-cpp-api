@@ -28,18 +28,18 @@ bool checkCandles(const std::vector<spot::Candle>& candles, const CandleInterval
 }
 
 void saveCandles(const std::vector<spot::Candle>& candles, const std::string& filePath) {
-    if (std::ofstream file(filePath); !file.is_open()) {
-        spdlog::error("Failed to open file {}", filePath);
-    }
-    else {
-        file << "OpenTime" << "," << "CloseTime" << "," << "Open" << "," << "High" << "," << "Low" << "," << "Close" <<
-            "," << "Volume" << std::endl;
-        for (const auto& c : candles) {
-            file << c.m_openTime << "," << c.m_closeTime << "," << c.m_open.str(8, std::ios_base::fixed) << "," << c.
-                m_high.str(8, std::ios_base::fixed) << "," << c.m_low.str(8, std::ios_base::fixed) << "," << c.m_close.
-                str(8, std::ios_base::fixed) << "," << c.m_volume.str(10, std::ios_base::fixed) << std::endl;
-        }
-    }
+    // if (std::ofstream file(filePath); !file.is_open()) {
+    //     spdlog::error("Failed to open file {}", filePath);
+    // }
+    // else {
+    //     file << "OpenTime" << "," << "CloseTime" << "," << "Open" << "," << "High" << "," << "Low" << "," << "Close" <<
+    //         "," << "Volume" << std::endl;
+    //     for (const auto& c : candles) {
+    //         file << c.m_openTime << "," << c.m_closeTime << "," << c.m_open.str(8, std::ios_base::fixed) << "," << c.
+    //             m_high.str(8, std::ios_base::fixed) << "," << c.m_low.str(8, std::ios_base::fixed) << "," << c.m_close.
+    //             str(8, std::ios_base::fixed) << "," << c.m_volume.str(10, std::ios_base::fixed) << std::endl;
+    //     }
+    // }
 }
 
 void testHistory() {
@@ -65,16 +65,16 @@ void testHistory() {
 }
 
 void testTickerPrice() {
-    try {
-        const auto restClient = std::make_unique<spot::RESTClient>("", "");
-
-        if (const auto tickerPrices = restClient->getTickerPrice("PLSUSDT"); tickerPrices.size() == 1) {
-            spdlog::info("Ticker price = {}", tickerPrices[0].m_price.convert_to<std::string>());
-        }
-    }
-    catch (std::exception& e) {
-        spdlog::error("{}", e.what());
-    }
+    // try {
+    //     const auto restClient = std::make_unique<spot::RESTClient>("", "");
+    //
+    //     if (const auto tickerPrices = restClient->getTickerPrice("PLSUSDT"); tickerPrices.size() == 1) {
+    //         spdlog::info("Ticker price = {}", tickerPrices[0].m_price.convert_to<std::string>());
+    //     }
+    // }
+    // catch (std::exception& e) {
+    //     spdlog::error("{}", e.what());
+    // }
 }
 
 void testServerTime() {
