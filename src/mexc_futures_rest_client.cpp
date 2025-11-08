@@ -8,7 +8,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 
 #include "vk/mexc/mexc_futures_rest_client.h"
 #include "vk/mexc/mexc_http_session.h"
-#include <fmt/format.h>
+#include <spdlog/fmt/ostr.h>
 
 namespace vk::mexc::futures {
 template <typename ValueType>
