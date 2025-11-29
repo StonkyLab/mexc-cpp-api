@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.0)
 project(mexc_api)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -13,7 +13,7 @@ if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif ()
 
-find_package(Boost 1.83 REQUIRED)
+find_package(Boost 1.88 REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
@@ -28,7 +28,8 @@ endif()
 set(HEADERS
         include/vk/mexc/mexc.h
         include/vk/mexc/mexc_enums.h
-        include/vk/mexc/mexc_http_session.h
+        include/vk/mexc/mexc_http_futures_session.h
+        include/vk/mexc/mexc_http_spot_session.h
         include/vk/mexc/mexc_models.h
         include/vk/mexc/mexc_spot_rest_client.h
         include/vk/mexc/mexc_futures_rest_client.h
@@ -41,7 +42,8 @@ set(HEADERS
 
 set(SOURCES
         src/mexc.cpp
-        src/mexc_http_session.cpp
+        src/mexc_http_futures_session.cpp
+        src/mexc_http_spot_session.cpp
         src/mexc_models.cpp
         src/mexc_spot_rest_client.cpp
         src/mexc_futures_rest_client.cpp

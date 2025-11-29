@@ -7,7 +7,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
 #include "vk/mexc/mexc_futures_rest_client.h"
-#include "vk/mexc/mexc_http_session.h"
+#include "vk/mexc/mexc_http_futures_session.h"
 #include <spdlog/fmt/ostr.h>
 
 namespace vk::mexc::futures {
@@ -16,16 +16,16 @@ ValueType handleMEXCResponse(const http::response<http::string_body>& response) 
     ValueType retVal;
     retVal.fromJson(nlohmann::json::parse(response.body()));
 
-    if (!retVal.m_success) {
+    if (!retVal.success) {
         throw std::runtime_error(
-            fmt::format("MEXC API error, code: {}", retVal.m_code).c_str());
+            fmt::format("MEXC API error, code: {}", retVal.code).c_str());
     }
 
     return retVal;
 }
 struct RESTClient::P {
-    RESTClient *m_parent = nullptr;
-    std::shared_ptr<HTTPSession> m_httpSession;
+    RESTClient *parent = nullptr;
+    std::shared_ptr<HTTPSession> httpSession;
 
     static http::response<http::string_body> checkResponse(const http::response<http::string_body>& response) {
         if (response.result() != http::status::ok) {
@@ -36,43 +36,43 @@ struct RESTClient::P {
     }
 
     explicit P(RESTClient *parent) {
-        m_parent = parent;
+        this->parent = parent;
     }
 };
 
 RESTClient::RESTClient(const std::string &apiKey, const std::string &apiSecret) : m_p(
     std::make_unique<P>(this)) {
-    m_p->m_httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret, true);
+    m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
 }
 
 RESTClient::~RESTClient() = default;
 
 void RESTClient::setCredentials(const std::string &apiKey, const std::string &apiSecret) const {
-    m_p->m_httpSession.reset();
-    m_p->m_httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret, true);
+    m_p->httpSession.reset();
+    m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
 }
 
 std::int64_t RESTClient::getServerTime() const {
     const std::string path = "/api/v1/contract/ping";
-    const auto response = P::checkResponse(m_p->m_httpSession->methodGet(path, {}));
-    return handleMEXCResponse<ServerTime>(response).m_serverTime;
+    const auto response = P::checkResponse(m_p->httpSession->methodGet(path, {}));
+    return handleMEXCResponse<ServerTime>(response).serverTime;
 }
 
 FundingRate RESTClient::getContractFundingRate(const std::string &contract) const {
     const std::string path = "/api/v1/contract/funding_rate/" + contract;
-    const auto response = P::checkResponse(m_p->m_httpSession->methodGet(path,{}));
+    const auto response = P::checkResponse(m_p->httpSession->methodGet(path,{}));
     return handleMEXCResponse<FundingRate>(response);
 }
 
 std::vector<FundingRate> RESTClient::getContractFundingRates() const {
     const std::string path = "/api/v1/contract/funding_rate";
-    const auto response = P::checkResponse(m_p->m_httpSession->methodGet(path,{}));
-    return handleMEXCResponse<FundingRates>(response).m_fundingRates;
+    const auto response = P::checkResponse(m_p->httpSession->methodGet(path,{}));
+    return handleMEXCResponse<FundingRates>(response).fundingRates;
 }
 
 WalletBalance RESTClient::getWalletBalance(const std::string &currency) const {
     const std::string path = "/api/v1/private/account/asset/" + currency;
-    const auto response = P::checkResponse(m_p->m_httpSession->methodGet(path,{}, false));
+    const auto response = P::checkResponse(m_p->httpSession->methodGet(path,{}, false));
     return handleMEXCResponse<WalletBalance>(response);
 }
 }

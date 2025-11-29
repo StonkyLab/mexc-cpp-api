@@ -15,32 +15,60 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 
 namespace vk::mexc::spot {
 
-struct ServerTime final : IJson {
-    std::int64_t m_serverTime{};
+struct Response : IJson {
+    int code{};
+    std::string msg{};
+    nlohmann::json data{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
     void fromJson(const nlohmann::json &json) override;
 };
 
-struct Candle final : IJson {
-    std::int64_t m_openTime{};
-    std::int64_t m_closeTime{};
-     boost::multiprecision::cpp_dec_float_50 m_open{};
-     boost::multiprecision::cpp_dec_float_50 m_high{};
-     boost::multiprecision::cpp_dec_float_50 m_low{};
-     boost::multiprecision::cpp_dec_float_50 m_close{};
-     boost::multiprecision::cpp_dec_float_50 m_volume{};
-     boost::multiprecision::cpp_dec_float_50 m_quoteAssetVolume{};
+struct ServerTime final : Response {
+    std::int64_t serverTime{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
     void fromJson(const nlohmann::json &json) override;
 };
 
-struct TickerPrice final : IJson {
-    std::string m_symbol{};
-    boost::multiprecision::cpp_dec_float_50 m_price{};
+struct Candle final : Response {
+    std::int64_t openTime{};
+    std::int64_t closeTime{};
+     boost::multiprecision::cpp_dec_float_50 open{};
+     boost::multiprecision::cpp_dec_float_50 high{};
+     boost::multiprecision::cpp_dec_float_50 low{};
+     boost::multiprecision::cpp_dec_float_50 close{};
+     boost::multiprecision::cpp_dec_float_50 volume{};
+     boost::multiprecision::cpp_dec_float_50 quoteAssetVolume{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct TickerPrice final : Response {
+    std::string symbol{};
+    boost::multiprecision::cpp_dec_float_50 price{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct ListenKey final : Response {
+    std::string listenKey{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct ListenKeys final : Response {
+    std::int32_t available{};
+    std::int32_t total{};
+    std::vector<std::string> listenKeys{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -50,9 +78,9 @@ struct TickerPrice final : IJson {
 
 namespace vk::mexc::futures {
 struct Response : IJson {
-    int m_code{};
-    bool m_success{};
-    nlohmann::json m_data{};
+    int code{};
+    bool success{};
+    nlohmann::json data{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -60,7 +88,7 @@ struct Response : IJson {
 };
 
 struct ServerTime final : Response {
-    std::int64_t m_serverTime{};
+    std::int64_t serverTime{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -68,13 +96,13 @@ struct ServerTime final : Response {
 };
 
 struct FundingRate final : Response {
-    std::string m_symbol{};
-    boost::multiprecision::cpp_dec_float_50 m_fundingRate{};
-    boost::multiprecision::cpp_dec_float_50 m_maxFundingRate{};
-    boost::multiprecision::cpp_dec_float_50 m_minFundingRate{};
-    std::int32_t m_collectCycle{};
-    std::int64_t m_nextSettleTime{};
-    std::int64_t m_timestamp{};
+    std::string symbol{};
+    boost::multiprecision::cpp_dec_float_50 fundingRate{};
+    boost::multiprecision::cpp_dec_float_50 maxFundingRate{};
+    boost::multiprecision::cpp_dec_float_50 minFundingRate{};
+    std::int32_t collectCycle{};
+    std::int64_t nextSettleTime{};
+    std::int64_t timestamp{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -82,7 +110,7 @@ struct FundingRate final : Response {
 };
 
 struct FundingRates final : Response {
-    std::vector<FundingRate> m_fundingRates{};
+    std::vector<FundingRate> fundingRates{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -90,14 +118,14 @@ struct FundingRates final : Response {
 };
 
 struct WalletBalance final : Response {
-    std::string m_currency{};
-    boost::multiprecision::cpp_dec_float_50 m_positionMargin{};
-    boost::multiprecision::cpp_dec_float_50 m_availableBalance{};
-    boost::multiprecision::cpp_dec_float_50 m_cashBalance{};
-    boost::multiprecision::cpp_dec_float_50 m_frozenBalance{};
-    boost::multiprecision::cpp_dec_float_50 m_equity{};
-    boost::multiprecision::cpp_dec_float_50 m_unrealized{};
-    boost::multiprecision::cpp_dec_float_50 m_bonus{};
+    std::string currency{};
+    boost::multiprecision::cpp_dec_float_50 positionMargin{};
+    boost::multiprecision::cpp_dec_float_50 availableBalance{};
+    boost::multiprecision::cpp_dec_float_50 cashBalance{};
+    boost::multiprecision::cpp_dec_float_50 frozenBalance{};
+    boost::multiprecision::cpp_dec_float_50 equity{};
+    boost::multiprecision::cpp_dec_float_50 unrealized{};
+    boost::multiprecision::cpp_dec_float_50 bonus{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
