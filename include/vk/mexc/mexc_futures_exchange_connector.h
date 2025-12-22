@@ -10,14 +10,9 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #define INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
 
 #include "vk/interface/i_exchange_connector.h"
+#include "vk/utils/magic_enum_wrapper.hpp"
 #include "vk/common/module_factory.h"
 #include <memory>
-
-#ifdef _WIN32
-#include "magic_enum/magic_enum.hpp"
-#else
-#include "magic_enum.hpp"
-#endif
 
 namespace vk {
 class MEXCFuturesExchangeConnector final : public IExchangeConnector {
