@@ -12,10 +12,14 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 
 #include <string>
 #include <memory>
+#include <functional>
 #include "mexc_models.h"
 #include "mexc_enums.h"
 
 namespace vk::mexc::futures {
+
+using onCandlesDownloaded = std::function<void(const std::vector<Candle>&)>;
+
 class RESTClient {
 	struct P;
 	std::unique_ptr<P> m_p{};
@@ -62,13 +66,14 @@ public:
 	 * @param interval candle interval
 	 * @param startTime timestamp in seconds
 	 * @param endTime timestamp in seconds
+	 * @param writer optional callback called after each batch of candles is downloaded for progressive saving
 	 * @return vector of Candle structures
 	 * @throws std::exception
 	 * @see https://www.mexc.com/api-docs/futures/market-endpoints#get-contract-kline
 	 */
 	[[nodiscard]] std::vector<Candle>
 	getHistoricalPrices(const std::string &symbol, CandleInterval interval, std::int64_t startTime,
-	                    std::int64_t endTime) const;
+	                    std::int64_t endTime, const onCandlesDownloaded &writer = {}) const;
 };
 }
 

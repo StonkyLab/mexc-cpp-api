@@ -9,6 +9,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/mexc/mexc_futures_rest_client.h"
 #include "vk/mexc/mexc_http_futures_session.h"
 #include <spdlog/fmt/ostr.h>
+#include <algorithm>
 
 namespace vk::mexc::futures {
 template <typename ValueType>
@@ -90,7 +91,8 @@ WalletBalance RESTClient::getWalletBalance(const std::string &currency) const {
 }
 
 std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, const CandleInterval interval,
-                                                     const std::int64_t startTime, const std::int64_t endTime) const {
+                                                     const std::int64_t startTime, const std::int64_t endTime,
+                                                     const onCandlesDownloaded &writer) const {
     std::vector<Candle> retVal;
     std::int64_t currentEndTime = endTime;
     std::vector<Candle> candles;
@@ -102,11 +104,26 @@ std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, c
     }
 
     while (!candles.empty()) {
-        // Insert at the beginning since we're fetching backwards
+        // MEXC returns candles in reverse chronological order (newest first)
+        // candles.back() is the oldest candle in the batch
+        // Get the oldest timestamp BEFORE reversing for pagination
+        const auto oldestTimestamp = candles.back().openTime;
+
+        // Reverse to get chronological order (oldest first within batch)
+        std::ranges::reverse(candles);
+
+        // Call writer callback IMMEDIATELY after each batch for progressive saving
+        // Batches arrive in reverse chronological order (newest batch first)
+        // The writer should handle storing batches and final ordering
+        if (writer) {
+            writer(candles);
+        }
+
+        // Also accumulate for return value
         retVal.insert(retVal.begin(), candles.begin(), candles.end());
 
-        // First candle openTime is in ms, use it as the new end time (minus 1 second)
-        currentEndTime = candles.front().openTime / 1000 - 1;
+        // Use oldest candle's timestamp (in ms) as new end time (convert to seconds, minus 1)
+        currentEndTime = oldestTimestamp / 1000 - 1;
         candles.clear();
 
         if (startTime < currentEndTime) {
@@ -114,9 +131,9 @@ std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, c
         }
     }
 
-    // Remove last candle as it might be incomplete
+    // Remove last candle as it might be incomplete (it's now at the beginning after all inserts)
     if (!retVal.empty()) {
-        retVal.pop_back();
+        retVal.erase(retVal.begin());
     }
 
     return retVal;
