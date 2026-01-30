@@ -69,12 +69,12 @@ void testHistory() {
         const auto from = std::chrono::seconds(std::time(nullptr)).count() - HISTORY_LENGTH_IN_S;
         const auto to = std::chrono::seconds(std::time(nullptr)).count();
 
-        const auto candles = restClient->getHistoricalPrices("PLSUSDT", CandleInterval::_1m, from * 1000, to * 1000);
+        const auto candles = restClient->getHistoricalPrices("BTCUSDT", CandleInterval::_1m, from * 1000, to * 1000);
 
         if (const auto isOK = checkCandles(candles, CandleInterval::_1m); !isOK) {
             spdlog::error("Gaps in candles!");
         } else {
-            saveCandles(candles, "PLSUSDT.csv");
+            saveCandles(candles, "BTCUSDT.csv");
             spdlog::info("Candles OK");
         }
     } catch (std::exception &e) {
@@ -86,7 +86,7 @@ void testTickerPrice() {
     try {
         const auto restClient = std::make_unique<spot::RESTClient>("", "");
 
-        if (const auto tickerPrices = restClient->getTickerPrice("PLSUSDT"); tickerPrices.size() == 1) {
+        if (const auto tickerPrices = restClient->getTickerPrice("BTCUSDT"); tickerPrices.size() == 1) {
             spdlog::info("Ticker price = {}", tickerPrices[0].price.convert_to<std::string>());
         }
     } catch (std::exception &e) {
@@ -116,15 +116,17 @@ void testListenKeys(const std::pair<std::string, std::string> &credentials) {
 }
 
 int main(int argc, char **argv) {
-    if (argc <= 1) {
-        spdlog::error("No parameters!");
-        return -1;
-    }
-
     try {
-        const auto credentials = readCredentials(argv[1]);
-        testListenKeys(credentials);
-        testListenKey(credentials);
+        // These tests don't require credentials
+        testHistory();
+        testServerTime();
+        testTickerPrice();
+
+        if (argc > 1) {
+            const auto credentials = readCredentials(argv[1]);
+            testListenKeys(credentials);
+            testListenKey(credentials);
+        }
     } catch (const std::exception &e) {
         spdlog::error("Exception: {}", e.what());
     }

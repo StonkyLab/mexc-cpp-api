@@ -18,6 +18,9 @@ enum class CandleInterval;
 class MEXC {
 public:
     static int64_t numberOfMsForCandleInterval(CandleInterval candleInterval);
+
+    /// Convert CandleInterval to spot API format (e.g., "1m", "5m", "1h")
+    static std::string candleIntervalToSpotString(CandleInterval candleInterval);
 };
 }
 #endif // INCLUDE_VK_MEXC_API_H

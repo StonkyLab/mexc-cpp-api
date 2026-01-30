@@ -57,7 +57,7 @@ public:
         const std::string path = "/api/v3/klines";
         std::map<std::string, std::string> parameters;
         parameters.insert_or_assign("symbol", symbol);
-        parameters.insert_or_assign("interval", magic_enum::enum_name(interval));
+        parameters.insert_or_assign("interval", MEXC::candleIntervalToSpotString(interval));
         parameters.insert_or_assign("startTime", std::to_string(startTime));
         parameters.insert_or_assign("endTime", std::to_string(endTime));
 

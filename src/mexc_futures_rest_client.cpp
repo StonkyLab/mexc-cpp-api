@@ -38,6 +38,19 @@ struct RESTClient::P {
     explicit P(RESTClient *parent) {
         this->parent = parent;
     }
+
+    [[nodiscard]] std::vector<Candle>
+    getHistoricalPrices(const std::string &symbol, CandleInterval interval, std::int64_t startTime,
+                        std::int64_t endTime) const {
+        const std::string path = "/api/v1/contract/kline/" + symbol;
+        std::map<std::string, std::string> parameters;
+        parameters.insert_or_assign("interval", std::string(magic_enum::enum_name(interval)));
+        parameters.insert_or_assign("start", std::to_string(startTime));
+        parameters.insert_or_assign("end", std::to_string(endTime));
+
+        const auto response = checkResponse(httpSession->methodGet(path, parameters));
+        return handleMEXCResponse<Candles>(response).candles;
+    }
 };
 
 RESTClient::RESTClient(const std::string &apiKey, const std::string &apiSecret) : m_p(
@@ -74,5 +87,38 @@ WalletBalance RESTClient::getWalletBalance(const std::string &currency) const {
     const std::string path = "/api/v1/private/account/asset/" + currency;
     const auto response = P::checkResponse(m_p->httpSession->methodGet(path,{}, false));
     return handleMEXCResponse<WalletBalance>(response);
+}
+
+std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, const CandleInterval interval,
+                                                     const std::int64_t startTime, const std::int64_t endTime) const {
+    std::vector<Candle> retVal;
+    std::int64_t currentEndTime = endTime;
+    std::vector<Candle> candles;
+
+    // MEXC API returns candles going backwards from end time
+    // We need to paginate by decreasing the end time
+    if (startTime < currentEndTime) {
+        candles = m_p->getHistoricalPrices(symbol, interval, startTime, currentEndTime);
+    }
+
+    while (!candles.empty()) {
+        // Insert at the beginning since we're fetching backwards
+        retVal.insert(retVal.begin(), candles.begin(), candles.end());
+
+        // First candle openTime is in ms, use it as the new end time (minus 1 second)
+        currentEndTime = candles.front().openTime / 1000 - 1;
+        candles.clear();
+
+        if (startTime < currentEndTime) {
+            candles = m_p->getHistoricalPrices(symbol, interval, startTime, currentEndTime);
+        }
+    }
+
+    // Remove last candle as it might be incomplete
+    if (!retVal.empty()) {
+        retVal.pop_back();
+    }
+
+    return retVal;
 }
 }

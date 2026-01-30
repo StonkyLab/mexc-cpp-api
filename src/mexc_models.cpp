@@ -150,4 +150,48 @@ void WalletBalance::fromJson(const nlohmann::json &json) {
     unrealized = readDecimalValue(data, "unrealized");
     bonus = readDecimalValue(data, "bonus");
 }
+
+nlohmann::json Candle::toJson() const {
+    throw std::runtime_error("Unimplemented: Candle::toJson()");
+}
+
+void Candle::fromJson(const nlohmann::json &json) {
+    // Single candle is not parsed from JSON directly, see Candles::fromJson
+    throw std::runtime_error("Unimplemented: Candle::fromJson()");
+}
+
+nlohmann::json Candles::toJson() const {
+    throw std::runtime_error("Unimplemented: Candles::toJson()");
+}
+
+void Candles::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+
+    if (!data.contains("time") || data["time"].empty()) {
+        return;
+    }
+
+    const auto &times = data["time"];
+    const auto &opens = data["open"];
+    const auto &highs = data["high"];
+    const auto &lows = data["low"];
+    const auto &closes = data["close"];
+    const auto &vols = data["vol"];
+    const auto &amounts = data["amount"];
+
+    const size_t count = times.size();
+    candles.reserve(count);
+
+    for (size_t i = 0; i < count; ++i) {
+        Candle candle;
+        candle.openTime = times[i].get<std::int64_t>() * 1000; // Convert seconds to ms
+        candle.open.assign(std::to_string(opens[i].get<double>()));
+        candle.high.assign(std::to_string(highs[i].get<double>()));
+        candle.low.assign(std::to_string(lows[i].get<double>()));
+        candle.close.assign(std::to_string(closes[i].get<double>()));
+        candle.volume.assign(std::to_string(vols[i].get<double>()));
+        candle.amount.assign(std::to_string(amounts[i].get<double>()));
+        candles.push_back(candle);
+    }
+}
 }

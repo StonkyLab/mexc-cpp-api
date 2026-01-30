@@ -131,6 +131,28 @@ struct WalletBalance final : Response {
 
     void fromJson(const nlohmann::json& json) override;
 };
+
+struct Candle final : IJson {
+    std::int64_t openTime{};
+    boost::multiprecision::cpp_dec_float_50 open{};
+    boost::multiprecision::cpp_dec_float_50 high{};
+    boost::multiprecision::cpp_dec_float_50 low{};
+    boost::multiprecision::cpp_dec_float_50 close{};
+    boost::multiprecision::cpp_dec_float_50 volume{};
+    boost::multiprecision::cpp_dec_float_50 amount{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct Candles final : Response {
+    std::vector<Candle> candles{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
 }
 
 #endif // INCLUDE_VK_MEXC_MODELS_H

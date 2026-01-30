@@ -19,7 +19,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(magic_enum REQUIRED)
 
-include_directories(include vk_cpp_common/include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+include_directories(include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 if (NOT TARGET vk_common)
     add_subdirectory(vk_cpp_common)
@@ -60,13 +60,13 @@ else ()
     add_library(mexc_api STATIC ${SOURCES} ${HEADERS})
 
     add_executable(test_mexc_api_spot test/main_spot.cpp)
-    target_link_libraries(test_mexc_api_spot PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
+    target_link_libraries(test_mexc_api_spot PRIVATE spdlog::spdlog_header_only mexc_api vk_common OpenSSL::Crypto)
 
     add_executable(test_mexc_api_futures test/main_futures.cpp)
-    target_link_libraries(test_mexc_api_futures PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
+    target_link_libraries(test_mexc_api_futures PRIVATE spdlog::spdlog_header_only mexc_api vk_common OpenSSL::Crypto)
 
     add_executable(test_mexc_ws_api test/ws_main.cpp)
-    target_link_libraries(test_mexc_ws_api PRIVATE spdlog::spdlog_header_only mexc_api OpenSSL::Crypto)
+    target_link_libraries(test_mexc_ws_api PRIVATE spdlog::spdlog_header_only mexc_api vk_common OpenSSL::Crypto)
 endif ()
 
 target_link_libraries(mexc_api PRIVATE OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json)

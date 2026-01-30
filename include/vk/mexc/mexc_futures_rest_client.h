@@ -13,6 +13,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <string>
 #include <memory>
 #include "mexc_models.h"
+#include "mexc_enums.h"
 
 namespace vk::mexc::futures {
 class RESTClient {
@@ -54,6 +55,20 @@ public:
 	 * @return WalletBalance
 	 */
 	[[nodiscard]] WalletBalance getWalletBalance(const std::string &currency) const;
+
+	/**
+	 * Download historical candles
+	 * @param symbol e.g. BTC_USDT
+	 * @param interval candle interval
+	 * @param startTime timestamp in seconds
+	 * @param endTime timestamp in seconds
+	 * @return vector of Candle structures
+	 * @throws std::exception
+	 * @see https://www.mexc.com/api-docs/futures/market-endpoints#get-contract-kline
+	 */
+	[[nodiscard]] std::vector<Candle>
+	getHistoricalPrices(const std::string &symbol, CandleInterval interval, std::int64_t startTime,
+	                    std::int64_t endTime) const;
 };
 }
 
