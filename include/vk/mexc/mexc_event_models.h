@@ -9,18 +9,16 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #ifndef INCLUDE_VK_MEXC_EVENT_MODELS_V5_H
 #define INCLUDE_VK_MEXC_EVENT_MODELS_V5_H
 
+#include "mexc_enums.h"
 #include "vk/interface/i_json.h"
 #include <nlohmann/json.hpp>
-#include <boost/multiprecision/cpp_dec_float.hpp>
-
-#include "mexc_enums.h"
 
 namespace vk::mexc::futures {
 struct WSSubscriptionParameters final : IJson {
-	std::string m_symbol{};
-	std::string m_interval{};
-	std::int32_t m_limit{-1};
-	bool m_compress{false};
+	std::string symbol{};
+	std::string interval{};
+	std::int32_t limit{-1};
+	bool compress{false};
 
 	[[nodiscard]] nlohmann::json toJson() const override;
 
@@ -28,8 +26,8 @@ struct WSSubscriptionParameters final : IJson {
 };
 
 struct WSSubscription final : IJson {
-	std::string m_method{};
-	WSSubscriptionParameters m_parameters{};
+	std::string method{};
+	WSSubscriptionParameters parameters{};
 
 	[[nodiscard]] nlohmann::json toJson() const override;
 
@@ -37,10 +35,10 @@ struct WSSubscription final : IJson {
 };
 
 struct Event final : IJson {
-	std::string m_channel{};
-	std::string m_symbol{};
-	std::int64_t m_ts{};
-	nlohmann::json m_data{};
+	std::string channel{};
+	std::string symbol{};
+	std::int64_t ts{};
+	nlohmann::json data{};
 
 	~Event() override = default;
 
@@ -50,19 +48,19 @@ struct Event final : IJson {
 };
 
 struct EventTicker final : IJson {
-	std::string m_symbol{};
-	double m_bid1{};
-	double m_ask1{};
-	double m_volume24{};
-	double m_holdVol{};
-	double m_lower24Price{};
-	double m_high24Price{};
-	double m_riseFallRate{};
-	double m_riseFallValue{};
-	double m_indexPrice{};
-	double m_fairPrice{};
-	double m_fundingRate{};
-	std::int64_t m_timestamp{};
+	std::string symbol{};
+	double bid1{};
+	double ask1{};
+	double volume24{};
+	double holdVol{};
+	double lower24Price{};
+	double high24Price{};
+	double riseFallRate{};
+	double riseFallValue{};
+	double indexPrice{};
+	double fairPrice{};
+	double fundingRate{};
+	std::int64_t timestamp{};
 
 	[[nodiscard]] nlohmann::json toJson() const override;
 
@@ -70,15 +68,15 @@ struct EventTicker final : IJson {
 };
 
 struct EventCandlestick final : IJson {
-	std::string m_symbol{};
-	double m_amount{};
-	CandleInterval m_interval{};
-	double m_open{};
-	double m_high{};
-	double m_low{};
-	double m_close{};
-	double m_volume{};
-	std::int64_t m_start{};
+	std::string symbol{};
+	double amount{};
+	CandleInterval interval{};
+	double open{};
+	double high{};
+	double low{};
+	double close{};
+	double volume{};
+	std::int64_t start{};
 
 	[[nodiscard]] nlohmann::json toJson() const override;
 

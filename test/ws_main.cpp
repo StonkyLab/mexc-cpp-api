@@ -35,19 +35,19 @@ void testWSClient() {
 	const auto wsClient = futures::WSClient();
 
 	wsClient.setDataEventCallback([&](const futures::Event &event) {
-		if (event.m_channel == "push.ticker") {
-			defaultLogFunction(vk::LogSeverity::Info, event.m_data.dump());
+		if (event.channel == "push.ticker") {
+			defaultLogFunction(vk::LogSeverity::Info, event.data.dump());
 		}
 	}); {
 		futures::WSSubscription subscriptionRequest;
-		subscriptionRequest.m_method = "sub.ticker";
-		subscriptionRequest.m_parameters.m_symbol = "ETH_USDT";
+		subscriptionRequest.method = "sub.ticker";
+		subscriptionRequest.parameters.symbol = "ETH_USDT";
 		const auto subscriptionStr = subscriptionRequest.toJson().dump();
 		wsClient.subscribe(subscriptionRequest.toJson());
 	} {
 		futures::WSSubscription subscriptionRequest;
-		subscriptionRequest.m_method = "sub.ticker";
-		subscriptionRequest.m_parameters.m_symbol = "BTC_USDT";
+		subscriptionRequest.method = "sub.ticker";
+		subscriptionRequest.parameters.symbol = "BTC_USDT";
 		const auto subscriptionStr = subscriptionRequest.toJson().dump();
 		wsClient.subscribe(subscriptionRequest.toJson());
 	}
@@ -61,7 +61,7 @@ void testWSManagerTicker() {
 	while (true) {
 		{
 			if (const auto ret = wsManager.readEventTicker("ETH_USDT")) {
-				spdlog::info("ETH price: {}", ret->m_fairPrice);
+				spdlog::info("ETH price: {}", ret->fairPrice);
 			} else {
 				spdlog::error("Error reading event");
 			}
@@ -78,7 +78,7 @@ void testWSManagerCandle() {
 	while (true) {
 		{
 			if (const auto ret = wsManager.readEventCandlestick("ETH_USDT", CandleInterval::_1m)) {
-				spdlog::info("ETH open price: {}", ret->m_open);
+				spdlog::info("ETH open price: {}", ret->open);
 			} else {
 				spdlog::error("Error reading event");
 			}

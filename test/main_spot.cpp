@@ -51,13 +51,10 @@ void saveCandles(const std::vector<spot::Candle> &candles, const std::string &fi
     if (std::ofstream file(filePath); !file.is_open()) {
         spdlog::error("Failed to open file {}", filePath);
     } else {
-        file << "OpenTime" << "," << "CloseTime" << "," << "Open" << "," << "High" << "," << "Low" << "," << "Close" <<
-                "," << "Volume" << std::endl;
+        file << "OpenTime" << "," << "CloseTime" << "," << "Open" << "," << "High" << "," << "Low" << "," << "Close" << "," << "Volume" << std::endl;
         for (const auto &c: candles) {
-            file << c.openTime << "," << c.closeTime << "," << c.open.str(8, std::ios_base::fixed) << "," << c.
-                    high.str(8, std::ios_base::fixed) << "," << c.low.str(8, std::ios_base::fixed) << "," << c.
-                    close.
-                    str(8, std::ios_base::fixed) << "," << c.volume.str(10, std::ios_base::fixed) << std::endl;
+            file << c.openTime << "," << c.closeTime << "," << c.open.str(8, std::ios_base::fixed) << "," << c.high.str(8, std::ios_base::fixed) << ","
+                 << c.low.str(8, std::ios_base::fixed) << "," << c.close.str(8, std::ios_base::fixed) << "," << c.volume.str(10, std::ios_base::fixed) << std::endl;
         }
     }
 }
@@ -100,14 +97,7 @@ void testServerTime() {
     spdlog::info("Server time: {}", time);
 }
 
-void testListenKey(const std::pair<std::string, std::string> &credentials) {
-    const auto restClient = std::make_unique<spot::RESTClient>(credentials.first, credentials.second);
-    //const auto listenKey = restClient->getListenKey();
-
-    // const auto listenKey = restClient->renewListenKey("ef6cda06a8b3bed264bd3359ab11038b7225d7ad1ec59449563fea71b0af3e75");
-    restClient->closeListenKey("ef6cda06a8b3bed264bd3359ab11038b7225d7ad1ec59449563fea71b0af3e75");
-    //spdlog::info("Listen key: {}", listenKey);
-}
+void testListenKey(const std::pair<std::string, std::string> &credentials) { const auto restClient = std::make_unique<spot::RESTClient>(credentials.first, credentials.second); }
 
 void testListenKeys(const std::pair<std::string, std::string> &credentials) {
     const auto restClient = std::make_unique<spot::RESTClient>(credentials.first, credentials.second);

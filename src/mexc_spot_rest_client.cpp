@@ -139,13 +139,13 @@ std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, c
     std::vector<Candle> retVal;
     std::int64_t currentEndTime = endTime;
     std::vector<Candle> candles;
-    const std::int32_t limit = 1000; // MEXC Spot API limit
+    constexpr std::int32_t limit = 1000; // MEXC Spot API limit
 
     // Calculate interval in milliseconds for pagination
     const auto intervalMs = MEXC::numberOfMsForCandleInterval(interval);
 
     // MEXC Spot API pagination: we fetch from endTime backwards
-    // First call: get newest batch up to endTime
+    // First call: get the newest batch up to endTime
     // For fresh downloads (startTime far in the past), API will return whatever data is available
     // We continue paginating backwards until we reach startTime or get empty result
     
@@ -153,12 +153,11 @@ std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, c
     if (startTime <= currentEndTime) {
         // For large ranges (fresh download), we want the newest data first
         // MEXC API behavior: returns 'limit' candles from startTime FORWARD
-        // So to get newest data, we only specify endTime without startTime,
+        // So to get the newest data, we only specify endTime without startTime,
         // or calculate startTime to get exactly 'limit' candles ending at endTime
         const int64_t rangeMs = currentEndTime - startTime;
-        const int64_t maxRangeForFirstCall = limit * intervalMs;
-        
-        if (rangeMs > maxRangeForFirstCall) {
+
+        if (const int64_t maxRangeForFirstCall = limit * intervalMs; rangeMs > maxRangeForFirstCall) {
             // Large range (fresh download)
             // Don't restrict startTime - let API return newest 'limit' candles up to endTime
             // We pass 0 as startTime to indicate "no constraint"
@@ -185,7 +184,7 @@ std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, c
         // Also accumulate for return value - insert at beginning since batches arrive newest-first
         retVal.insert(retVal.begin(), candles.begin(), candles.end());
 
-        // Use oldest candle's timestamp as new end time (minus 1 interval)
+        // Use the oldest candle's timestamp as new end time (minus 1 interval)
         // This ensures next batch fetches data OLDER than current batch
         currentEndTime = oldestTimestamp - intervalMs;
         candles.clear();
@@ -197,10 +196,6 @@ std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, c
             candles = m_p->getHistoricalPrices(symbol, interval, batchStartTime, currentEndTime, limit);
         }
     }
-
-    // Note: We don't remove the last candle here because the caller (downloader)
-    // already calculates endTime as the last COMPLETE candle boundary.
-    // If you need to remove incomplete candles, do it in the caller.
 
     return retVal;
 }

@@ -65,7 +65,7 @@ public:
      * @throws nlohmann::json::exception, std::exception
      * @see https://mexcdevelop.github.io/apidocs/spot_v3_en/#symbol-price-ticker
      */
-    std::vector<TickerPrice> getTickerPrice(const std::string &symbol) const;
+    [[nodiscard]] std::vector<TickerPrice> getTickerPrice(const std::string &symbol) const;
 
     /**
      * Starts a new data stream and return a listenKey for it. The stream will close 60 minutes after creation
@@ -73,28 +73,28 @@ public:
      * @see https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams
      * @return valid listen key
      */
-    std::string getListenKey() const;
+    [[nodiscard]] std::string getListenKey() const;
 
     /**
      * Retrieves all currently valid listen keys.
      * @see https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams
      * @return ListenKeys structure
      */
-    ListenKeys getListenKeys() const;
+    [[nodiscard]] ListenKeys getListenKeys() const;
 
     /**
      * Extends the validity to 60 minutes from the time of this call. It is recommended to send a request every 30 minutes.
      * @param listenKey
      * @return renewed listen key
      */
-    std::string renewListenKey(const std::string &listenKey) const;
+    [[nodiscard]] std::string renewListenKey(const std::string &listenKey) const;
 
     /**
      * Closes the user data stream.
      * @param listenKey
      * @return closed listen key
      */
-    std::string closeListenKey(const std::string &listenKey) const;
+    [[nodiscard]] std::string closeListenKey(const std::string &listenKey) const;
 };
 }
 

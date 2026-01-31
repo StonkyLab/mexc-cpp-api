@@ -13,18 +13,18 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 namespace vk::mexc::futures {
 nlohmann::json WSSubscriptionParameters::toJson() const {
 	nlohmann::json result;
-	result["symbol"] = m_symbol;
+	result["symbol"] = symbol;
 
-	if (m_compress) {
-		result["compress"] = m_compress;
+	if (compress) {
+		result["compress"] = compress;
 	}
 
-	if (m_limit != -1) {
-		result["limit"] = m_limit;
+	if (limit != -1) {
+		result["limit"] = limit;
 	}
 
-	if (!m_interval.empty()) {
-		result["interval"] = m_interval;
+	if (!interval.empty()) {
+		result["interval"] = interval;
 	}
 
 	return result;
@@ -36,8 +36,8 @@ void WSSubscriptionParameters::fromJson(const nlohmann::json &json) {
 
 nlohmann::json WSSubscription::toJson() const {
 	nlohmann::json result;
-	result["method"] = m_method;
-	result["param"] = m_parameters.toJson();
+	result["method"] = method;
+	result["param"] = parameters.toJson();
 	return result;
 }
 
@@ -50,10 +50,10 @@ nlohmann::json Event::toJson() const {
 }
 
 void Event::fromJson(const nlohmann::json &json) {
-	readValue<std::string>(json, "channel", m_channel);
-	readValue<std::string>(json, "symbol", m_symbol);
-	readValue<std::int64_t>(json, "ts", m_ts);
-	m_data = json["data"];
+	readValue<std::string>(json, "channel", channel);
+	readValue<std::string>(json, "symbol", symbol);
+	readValue<std::int64_t>(json, "ts", ts);
+	data = json["data"];
 }
 
 nlohmann::json EventTicker::toJson() const {
@@ -61,19 +61,19 @@ nlohmann::json EventTicker::toJson() const {
 }
 
 void EventTicker::fromJson(const nlohmann::json &json) {
-	readValue<std::string>(json, "symbol", m_symbol);
-	readValue<double>(json, "bid1", m_bid1);
-	readValue<double>(json, "ask1", m_ask1);
-	readValue<double>(json, "volume24", m_volume24);
-	readValue<double>(json, "holdVol", m_holdVol);
-	readValue<double>(json, "lower24Price", m_lower24Price);
-	readValue<double>(json, "high24Price", m_high24Price);
-	readValue<double>(json, "riseFallRate", m_riseFallRate);
-	readValue<double>(json, "riseFallValue", m_riseFallValue);
-	readValue<double>(json, "indexPrice", m_indexPrice);
-	readValue<double>(json, "fairPrice", m_fairPrice);
-	readValue<double>(json, "fundingRate", m_fundingRate);
-	readValue<std::int64_t>(json, "m_timestamp", m_timestamp);
+	readValue<std::string>(json, "symbol", symbol);
+	readValue<double>(json, "bid1", bid1);
+	readValue<double>(json, "ask1", ask1);
+	readValue<double>(json, "volume24", volume24);
+	readValue<double>(json, "holdVol", holdVol);
+	readValue<double>(json, "lower24Price", lower24Price);
+	readValue<double>(json, "high24Price", high24Price);
+	readValue<double>(json, "riseFallRate", riseFallRate);
+	readValue<double>(json, "riseFallValue", riseFallValue);
+	readValue<double>(json, "indexPrice", indexPrice);
+	readValue<double>(json, "fairPrice", fairPrice);
+	readValue<double>(json, "fundingRate", fundingRate);
+	readValue<std::int64_t>(json, "m_timestamp", timestamp);
 }
 
 nlohmann::json EventCandlestick::toJson() const {
@@ -81,14 +81,14 @@ nlohmann::json EventCandlestick::toJson() const {
 }
 
 void EventCandlestick::fromJson(const nlohmann::json &json) {
-	readValue<std::string>(json, "symbol", m_symbol);
-	readValue<double>(json, "a", m_amount);
-	readMagicEnum<CandleInterval>(json, "interval", m_interval);
-	readValue<double>(json, "o", m_open);
-	readValue<double>(json, "h", m_high);
-	readValue<double>(json, "l", m_low);
-	readValue<double>(json, "c", m_close);
-	readValue<double>(json, "q", m_volume);
-	readValue<std::int64_t>(json, "t", m_start);
+	readValue<std::string>(json, "symbol", symbol);
+	readValue<double>(json, "a", amount);
+	readMagicEnum<CandleInterval>(json, "interval", interval);
+	readValue<double>(json, "o", open);
+	readValue<double>(json, "h", high);
+	readValue<double>(json, "l", low);
+	readValue<double>(json, "c", close);
+	readValue<double>(json, "q", volume);
+	readValue<std::int64_t>(json, "t", start);
 }
 }
