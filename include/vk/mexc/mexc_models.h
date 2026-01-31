@@ -117,6 +117,28 @@ struct FundingRates final : Response {
     void fromJson(const nlohmann::json &json) override;
 };
 
+struct HistoricalFundingRate final : IJson {
+    std::string symbol{};
+    boost::multiprecision::cpp_dec_float_50 fundingRate{};
+    std::int64_t settleTime{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct HistoricalFundingRates final : Response {
+    std::int32_t pageSize{};
+    std::int32_t totalCount{};
+    std::int32_t totalPage{};
+    std::int32_t currentPage{};
+    std::vector<HistoricalFundingRate> resultList{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
 struct WalletBalance final : Response {
     std::string currency{};
     boost::multiprecision::cpp_dec_float_50 positionMargin{};

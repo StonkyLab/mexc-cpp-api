@@ -11,10 +11,14 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 
 #include <string>
 #include <memory>
+#include <functional>
 #include "mexc_models.h"
 #include "mexc_enums.h"
 
 namespace vk::mexc::spot {
+
+using onCandlesDownloaded = std::function<void(const std::vector<Candle>&)>;
+
 class RESTClient {
     struct P;
     std::unique_ptr<P> m_p{};
@@ -32,20 +36,19 @@ public:
     void setCredentials(const std::string &apiKey, const std::string &apiSecret) const;
 
     /**
-     * Download historical candles
-     * @param symbol e,g BTCUSDT
-     * @param interval
-     * @param startTime timestamp in ms, must be smaller than "to"
+     * Download historical candles with backward pagination
+     * @param symbol e.g. BTCUSDT
+     * @param interval candle interval
+     * @param startTime timestamp in ms
      * @param endTime timestamp in ms
-     * @param limit maximum number of returned candles, default value is 500
-     * @return vector of Candle structures
+     * @param writer optional callback called after each batch of candles is downloaded for progressive saving
+     * @return vector of Candle structures (last incomplete candle is removed)
      * @throws nlohmann::json::exception, std::exception
      * @see https://mexcdevelop.github.io/apidocs/spot_v3_en/#kline-candlestick-data
      */
     [[nodiscard]] std::vector<Candle>
     getHistoricalPrices(const std::string &symbol, CandleInterval interval, std::int64_t startTime,
-                        std::int64_t endTime,
-                        std::int32_t limit = 500) const;
+                        std::int64_t endTime, const onCandlesDownloaded &writer = {}) const;
 
     /**
      * Returns server time in ms

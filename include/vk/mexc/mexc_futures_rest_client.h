@@ -53,6 +53,18 @@ public:
 	[[nodiscard]] std::vector<FundingRate> getContractFundingRates() const;
 
 	/**
+	 * Returns historical funding rates for a contract with pagination
+	 * @param symbol contract symbol (e.g., BTC_USDT)
+	 * @param pageNum page number (starting from 1)
+	 * @param pageSize number of results per page (max 1000)
+	 * @see https://www.mexc.com/api-docs/futures/market-endpoints#get-contract-funding-rate-history
+	 * @return HistoricalFundingRates structure with pagination info
+	 */
+	[[nodiscard]] HistoricalFundingRates getContractFundingRateHistory(const std::string &symbol,
+	                                                                     std::int32_t pageNum = 1,
+	                                                                     std::int32_t pageSize = 1000) const;
+
+	/**
 	 * Get the user's single currency asset information
 	 * @see https://www.mexc.com/api-docs/futures/account-and-trading-endpoints#get-the-users-single-currency-asset-information
 	 * @param currency

@@ -111,9 +111,26 @@ nlohmann::json FundingRate::toJson() const {
 void FundingRate::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
     readValue<std::string>(data, "symbol", symbol);
-    fundingRate = readDecimalValue(data, "fundingRate");
-    maxFundingRate = readDecimalValue(data, "maxFundingRate");
-    minFundingRate = readDecimalValue(data, "minFundingRate");
+
+    // MEXC API returns funding rates as numbers, not strings
+    if (data.contains("fundingRate") && data["fundingRate"].is_number()) {
+        fundingRate.assign(std::to_string(data["fundingRate"].get<double>()));
+    } else {
+        fundingRate = readDecimalValue(data, "fundingRate");
+    }
+
+    if (data.contains("maxFundingRate") && data["maxFundingRate"].is_number()) {
+        maxFundingRate.assign(std::to_string(data["maxFundingRate"].get<double>()));
+    } else {
+        maxFundingRate = readDecimalValue(data, "maxFundingRate");
+    }
+
+    if (data.contains("minFundingRate") && data["minFundingRate"].is_number()) {
+        minFundingRate.assign(std::to_string(data["minFundingRate"].get<double>()));
+    } else {
+        minFundingRate = readDecimalValue(data, "minFundingRate");
+    }
+
     readValue<int>(data, "collectCycle", collectCycle);
     readValue<std::int64_t>(data, "nextSettleTime", nextSettleTime);
     readValue<std::int64_t>(data, "timestamp", timestamp);
@@ -132,6 +149,44 @@ void FundingRates::fromJson(const nlohmann::json &json) {
         FundingRate fundingRate;
         fundingRate.fromJson(data);
         fundingRates.push_back(fundingRate);
+    }
+}
+
+nlohmann::json HistoricalFundingRate::toJson() const {
+    throw std::runtime_error("Unimplemented: HistoricalFundingRate::toJson()");
+}
+
+void HistoricalFundingRate::fromJson(const nlohmann::json &json) {
+    readValue<std::string>(json, "symbol", symbol);
+
+    // MEXC API returns funding rates as numbers
+    if (json.contains("fundingRate") && json["fundingRate"].is_number()) {
+        fundingRate.assign(std::to_string(json["fundingRate"].get<double>()));
+    } else {
+        fundingRate = readDecimalValue(json, "fundingRate");
+    }
+
+    readValue<std::int64_t>(json, "settleTime", settleTime);
+}
+
+nlohmann::json HistoricalFundingRates::toJson() const {
+    throw std::runtime_error("Unimplemented: HistoricalFundingRates::toJson()");
+}
+
+void HistoricalFundingRates::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+
+    readValue<std::int32_t>(data, "pageSize", pageSize);
+    readValue<std::int32_t>(data, "totalCount", totalCount);
+    readValue<std::int32_t>(data, "totalPage", totalPage);
+    readValue<std::int32_t>(data, "currentPage", currentPage);
+
+    if (data.contains("resultList") && data["resultList"].is_array()) {
+        for (const auto &item : data["resultList"]) {
+            HistoricalFundingRate rate;
+            rate.fromJson(item);
+            resultList.push_back(rate);
+        }
     }
 }
 

@@ -47,7 +47,7 @@ std::string MEXC::candleIntervalToSpotString(const CandleInterval candleInterval
     case CandleInterval::_30m:
         return "30m";
     case CandleInterval::_60m:
-        return "1h";
+        return "60m";  // Spot API uses "60m" not "1h"
     case CandleInterval::_4h:
         return "4h";
     case CandleInterval::_8h:
