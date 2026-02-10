@@ -57,7 +57,7 @@ Balance MEXCFuturesExchangeConnector::getAccountBalance(const std::string& curre
 FundingRate MEXCFuturesExchangeConnector::getFundingRate(const std::string& symbol) const {
     const auto fr = m_p->m_restClient->getContractFundingRate(symbol);
     //return {fr.m_symbol,fr.m_fundingRate.convert_to<double>(), fr.m_nextSettleTime};
-    return {};
+    throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getFundingRate");
 }
 
 std::vector<FundingRate> MEXCFuturesExchangeConnector::getFundingRates() const {
@@ -71,7 +71,7 @@ std::vector<FundingRate> MEXCFuturesExchangeConnector::getFundingRates() const {
     //     retVal.push_back(fr);
     // }
 
-    return retVal;
+    throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getFundingRates");
 }
 
 std::vector<Ticker> MEXCFuturesExchangeConnector::getTickerInfo(const std::string& symbol) const {
@@ -81,4 +81,16 @@ std::vector<Ticker> MEXCFuturesExchangeConnector::getTickerInfo(const std::strin
 std::int64_t MEXCFuturesExchangeConnector::getServerTime() const {
     return m_p->m_restClient->getServerTime();
 }
+
+std::vector<Position> MEXCFuturesExchangeConnector::getPositionInfo(const std::string& symbol) const {
+    throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getPositionInfo");
 }
+
+std::vector<FundingRate> MEXCFuturesExchangeConnector::getHistoricalFundingRates(const std::string& symbol, std::int64_t startTime, std::int64_t endTime) const {
+    throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getHistoricalFundingRates");
+}
+
+std::vector<Candle> MEXCFuturesExchangeConnector::getHistoricalCandles(const std::string& symbol, CandleInterval interval, std::int64_t startTime, std::int64_t endTime) const {
+    throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getHistoricalCandles");
+}
+} // namespace vk
