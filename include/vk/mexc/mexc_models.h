@@ -12,6 +12,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <nlohmann/json.hpp>
 #include "vk/interface/i_json.h"
+#include "mexc_enums.h"
 
 namespace vk::mexc::spot {
 
@@ -163,6 +164,78 @@ struct Ticker final : Response {
     boost::multiprecision::cpp_dec_float_50 amount24{};
     boost::multiprecision::cpp_dec_float_50 holdVol{};
     std::int64_t timestamp{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct OpenPosition final : IJson {
+    std::int64_t positionId{};
+    std::string symbol{};
+    std::int32_t positionType{};  ///< 1=long, 2=short
+    std::int32_t openType{};      ///< 1=isolated, 2=cross
+    std::int32_t state{};
+    boost::multiprecision::cpp_dec_float_50 holdVol{};
+    boost::multiprecision::cpp_dec_float_50 frozenVol{};
+    boost::multiprecision::cpp_dec_float_50 holdAvgPrice{};
+    boost::multiprecision::cpp_dec_float_50 openAvgPrice{};
+    boost::multiprecision::cpp_dec_float_50 liquidatePrice{};
+    boost::multiprecision::cpp_dec_float_50 oim{};
+    boost::multiprecision::cpp_dec_float_50 im{};
+    boost::multiprecision::cpp_dec_float_50 holdFee{};
+    boost::multiprecision::cpp_dec_float_50 realised{};
+    std::int32_t leverage{};
+    std::int64_t createTime{};
+    std::int64_t updateTime{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct OpenPositions final : Response {
+    std::vector<OpenPosition> positions{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct OrderRequest final : IJson {
+    std::string symbol{};
+    double price{};
+    double vol{};
+    std::int32_t leverage{};
+    OrderSide side{};
+    OrderType type{};
+    MarginType openType{};
+    std::int64_t positionId{};         ///< Optional, recommended for close orders
+    std::string externalOid{};         ///< Optional external order ID
+    double stopLossPrice{};
+    double takeProfitPrice{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct OrderResponse final : Response {
+    std::int64_t orderId{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct CancelOrderResponse final : Response {
+    struct Result {
+        std::int64_t orderId{};
+        std::int32_t errorCode{};
+        std::string errorMsg{};
+    };
+
+    std::vector<Result> results{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 

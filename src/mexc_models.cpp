@@ -253,6 +253,154 @@ void Ticker::fromJson(const nlohmann::json &json) {
     readValue<std::int64_t>(data, "timestamp", timestamp);
 }
 
+nlohmann::json OpenPosition::toJson() const {
+    throw std::runtime_error("Unimplemented: OpenPosition::toJson()");
+}
+
+void OpenPosition::fromJson(const nlohmann::json &json) {
+    readValue<std::int64_t>(json, "positionId", positionId);
+    readValue<std::string>(json, "symbol", symbol);
+    readValue<std::int32_t>(json, "positionType", positionType);
+    readValue<std::int32_t>(json, "openType", openType);
+    readValue<std::int32_t>(json, "state", state);
+
+    if (json.contains("holdVol") && json["holdVol"].is_number()) {
+        holdVol.assign(std::to_string(json["holdVol"].get<double>()));
+    } else {
+        holdVol = readDecimalValue(json, "holdVol");
+    }
+
+    if (json.contains("frozenVol") && json["frozenVol"].is_number()) {
+        frozenVol.assign(std::to_string(json["frozenVol"].get<double>()));
+    } else {
+        frozenVol = readDecimalValue(json, "frozenVol");
+    }
+
+    if (json.contains("holdAvgPrice") && json["holdAvgPrice"].is_number()) {
+        holdAvgPrice.assign(std::to_string(json["holdAvgPrice"].get<double>()));
+    } else {
+        holdAvgPrice = readDecimalValue(json, "holdAvgPrice");
+    }
+
+    if (json.contains("openAvgPrice") && json["openAvgPrice"].is_number()) {
+        openAvgPrice.assign(std::to_string(json["openAvgPrice"].get<double>()));
+    } else {
+        openAvgPrice = readDecimalValue(json, "openAvgPrice");
+    }
+
+    if (json.contains("liquidatePrice") && json["liquidatePrice"].is_number()) {
+        liquidatePrice.assign(std::to_string(json["liquidatePrice"].get<double>()));
+    } else {
+        liquidatePrice = readDecimalValue(json, "liquidatePrice");
+    }
+
+    if (json.contains("oim") && json["oim"].is_number()) {
+        oim.assign(std::to_string(json["oim"].get<double>()));
+    } else {
+        oim = readDecimalValue(json, "oim");
+    }
+
+    if (json.contains("im") && json["im"].is_number()) {
+        im.assign(std::to_string(json["im"].get<double>()));
+    } else {
+        im = readDecimalValue(json, "im");
+    }
+
+    if (json.contains("holdFee") && json["holdFee"].is_number()) {
+        holdFee.assign(std::to_string(json["holdFee"].get<double>()));
+    } else {
+        holdFee = readDecimalValue(json, "holdFee");
+    }
+
+    if (json.contains("realised") && json["realised"].is_number()) {
+        realised.assign(std::to_string(json["realised"].get<double>()));
+    } else {
+        realised = readDecimalValue(json, "realised");
+    }
+
+    readValue<std::int32_t>(json, "leverage", leverage);
+    readValue<std::int64_t>(json, "createTime", createTime);
+    readValue<std::int64_t>(json, "updateTime", updateTime);
+}
+
+nlohmann::json OpenPositions::toJson() const {
+    throw std::runtime_error("Unimplemented: OpenPositions::toJson()");
+}
+
+void OpenPositions::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+
+    if (data.is_array()) {
+        for (const auto &item : data) {
+            OpenPosition pos;
+            pos.fromJson(item);
+            positions.push_back(pos);
+        }
+    }
+}
+
+nlohmann::json OrderRequest::toJson() const {
+    nlohmann::json j;
+    j["symbol"] = symbol;
+    j["price"] = price;
+    j["vol"] = vol;
+    j["side"] = static_cast<std::int32_t>(side);
+    j["type"] = static_cast<std::int32_t>(type);
+    j["openType"] = static_cast<std::int32_t>(openType);
+
+    if (leverage > 0) {
+        j["leverage"] = leverage;
+    }
+    if (positionId > 0) {
+        j["positionId"] = positionId;
+    }
+    if (!externalOid.empty()) {
+        j["externalOid"] = externalOid;
+    }
+    if (stopLossPrice > 0) {
+        j["stopLossPrice"] = stopLossPrice;
+    }
+    if (takeProfitPrice > 0) {
+        j["takeProfitPrice"] = takeProfitPrice;
+    }
+
+    return j;
+}
+
+void OrderRequest::fromJson(const nlohmann::json &json) {
+    throw std::runtime_error("Unimplemented: OrderRequest::fromJson()");
+}
+
+nlohmann::json OrderResponse::toJson() const {
+    throw std::runtime_error("Unimplemented: OrderResponse::toJson()");
+}
+
+void OrderResponse::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+
+    if (data.is_number_integer()) {
+        orderId = data.get<std::int64_t>();
+    }
+}
+
+nlohmann::json CancelOrderResponse::toJson() const {
+    throw std::runtime_error("Unimplemented: CancelOrderResponse::toJson()");
+}
+
+void CancelOrderResponse::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+
+    if (data.is_array()) {
+        for (const auto &item : data) {
+            Result r;
+            readValue<std::int64_t>(item, "orderId", r.orderId);
+            readValue<std::int32_t>(item, "errorCode", r.errorCode);
+            readValue<std::string>(item, "errorMsg", r.errorMsg);
+            results.push_back(r);
+        }
+    }
+}
+
 nlohmann::json Candle::toJson() const {
     throw std::runtime_error("Unimplemented: Candle::toJson()");
 }

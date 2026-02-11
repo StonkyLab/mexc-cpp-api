@@ -168,6 +168,39 @@ Ticker RESTClient::getContractTicker(const std::string &symbol) const {
     return handleMEXCResponse<Ticker>(response);
 }
 
+std::vector<OpenPosition> RESTClient::getOpenPositions(const std::string &symbol) const {
+    std::string path = "/api/v1/private/position/open_positions";
+    std::map<std::string, std::string> parameters;
+
+    if (!symbol.empty()) {
+        parameters.insert_or_assign("symbol", symbol);
+    }
+
+    m_p->rateLimiter.wait();
+    const auto response = P::checkResponse(m_p->httpSession->methodGet(path, parameters, false));
+    return handleMEXCResponse<OpenPositions>(response).positions;
+}
+
+OrderResponse RESTClient::submitOrder(const OrderRequest &request) const {
+    const std::string path = "/api/v1/private/order/submit";
+    // dump(-1) produces compact JSON (no whitespace) — critical for MD5 signing
+    const std::string jsonBody = request.toJson().dump(-1);
+
+    m_p->rateLimiter.wait();
+    const auto response = P::checkResponse(m_p->httpSession->methodPost(path, jsonBody));
+    return handleMEXCResponse<OrderResponse>(response);
+}
+
+CancelOrderResponse RESTClient::cancelOrders(const std::vector<std::int64_t> &orderIds) const {
+    const std::string path = "/api/v1/private/order/cancel";
+    const nlohmann::json body = orderIds;
+    const std::string jsonBody = body.dump(-1);
+
+    m_p->rateLimiter.wait();
+    const auto response = P::checkResponse(m_p->httpSession->methodPost(path, jsonBody));
+    return handleMEXCResponse<CancelOrderResponse>(response);
+}
+
 std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, const CandleInterval interval,
                                                      const std::int64_t startTime, const std::int64_t endTime,
                                                      const onCandlesDownloaded &writer) const {

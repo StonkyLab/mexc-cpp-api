@@ -88,6 +88,30 @@ public:
 	[[nodiscard]] Ticker getContractTicker(const std::string &symbol) const;
 
 	/**
+	 * Returns current open positions (requires authentication)
+	 * @param symbol optional filter by symbol (empty = all positions)
+	 * @return vector of OpenPosition
+	 * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#get-all-informations-of-user-39-s-open-positions
+	 */
+	[[nodiscard]] std::vector<OpenPosition> getOpenPositions(const std::string &symbol = {}) const;
+
+	/**
+	 * Submit a futures order (requires WEB token auth)
+	 * @param request Order parameters
+	 * @return OrderResponse with order ID on success
+	 * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#order-under-maintenance
+	 */
+	[[nodiscard]] OrderResponse submitOrder(const OrderRequest &request) const;
+
+	/**
+	 * Cancel futures orders by ID (requires WEB token auth)
+	 * @param orderIds list of order IDs to cancel (max 50)
+	 * @return CancelOrderResponse with per-order results
+	 * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#cancel-the-order-under-maintenance
+	 */
+	[[nodiscard]] CancelOrderResponse cancelOrders(const std::vector<std::int64_t> &orderIds) const;
+
+	/**
 	 * Download historical candles
 	 * @param symbol e.g. BTC_USDT
 	 * @param interval candle interval
