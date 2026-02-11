@@ -99,11 +99,21 @@ RESTClient::RESTClient(const std::string &apiKey, const std::string &apiSecret) 
     m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
 }
 
+RESTClient::RESTClient(const std::string &webToken, const AuthSource source) : m_p(
+    std::make_unique<P>(this)) {
+    m_p->httpSession = std::make_shared<HTTPSession>(webToken, source);
+}
+
 RESTClient::~RESTClient() = default;
 
 void RESTClient::setCredentials(const std::string &apiKey, const std::string &apiSecret) const {
     m_p->httpSession.reset();
     m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
+}
+
+void RESTClient::setWebToken(const std::string &webToken) const {
+    m_p->httpSession.reset();
+    m_p->httpSession = std::make_shared<HTTPSession>(webToken, AuthSource::Web);
 }
 
 std::int64_t RESTClient::getServerTime() const {
@@ -146,6 +156,16 @@ WalletBalance RESTClient::getWalletBalance(const std::string &currency) const {
     m_p->rateLimiter.wait();
     const auto response = P::checkResponse(m_p->httpSession->methodGet(path,{}, false));
     return handleMEXCResponse<WalletBalance>(response);
+}
+
+Ticker RESTClient::getContractTicker(const std::string &symbol) const {
+    const std::string path = "/api/v1/contract/ticker";
+    std::map<std::string, std::string> parameters;
+    parameters.insert_or_assign("symbol", symbol);
+
+    m_p->rateLimiter.wait();
+    const auto response = P::checkResponse(m_p->httpSession->methodGet(path, parameters));
+    return handleMEXCResponse<Ticker>(response);
 }
 
 std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, const CandleInterval interval,

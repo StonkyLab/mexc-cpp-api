@@ -206,6 +206,53 @@ void WalletBalance::fromJson(const nlohmann::json &json) {
     bonus = readDecimalValue(data, "bonus");
 }
 
+nlohmann::json Ticker::toJson() const {
+    throw std::runtime_error("Unimplemented: Ticker::toJson()");
+}
+
+void Ticker::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+    readValue<std::string>(data, "symbol", symbol);
+
+    if (data.contains("lastPrice") && data["lastPrice"].is_number()) {
+        lastPrice.assign(std::to_string(data["lastPrice"].get<double>()));
+    } else {
+        lastPrice = readDecimalValue(data, "lastPrice");
+    }
+
+    if (data.contains("bid1") && data["bid1"].is_number()) {
+        bid1.assign(std::to_string(data["bid1"].get<double>()));
+    } else {
+        bid1 = readDecimalValue(data, "bid1");
+    }
+
+    if (data.contains("ask1") && data["ask1"].is_number()) {
+        ask1.assign(std::to_string(data["ask1"].get<double>()));
+    } else {
+        ask1 = readDecimalValue(data, "ask1");
+    }
+
+    if (data.contains("volume24") && data["volume24"].is_number()) {
+        volume24.assign(std::to_string(data["volume24"].get<double>()));
+    } else {
+        volume24 = readDecimalValue(data, "volume24");
+    }
+
+    if (data.contains("amount24") && data["amount24"].is_number()) {
+        amount24.assign(std::to_string(data["amount24"].get<double>()));
+    } else {
+        amount24 = readDecimalValue(data, "amount24");
+    }
+
+    if (data.contains("holdVol") && data["holdVol"].is_number()) {
+        holdVol.assign(std::to_string(data["holdVol"].get<double>()));
+    } else {
+        holdVol = readDecimalValue(data, "holdVol");
+    }
+
+    readValue<std::int64_t>(data, "timestamp", timestamp);
+}
+
 nlohmann::json Candle::toJson() const {
     throw std::runtime_error("Unimplemented: Candle::toJson()");
 }

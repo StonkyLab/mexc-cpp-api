@@ -154,6 +154,21 @@ struct WalletBalance final : Response {
     void fromJson(const nlohmann::json& json) override;
 };
 
+struct Ticker final : Response {
+    std::string symbol{};
+    boost::multiprecision::cpp_dec_float_50 lastPrice{};
+    boost::multiprecision::cpp_dec_float_50 bid1{};
+    boost::multiprecision::cpp_dec_float_50 ask1{};
+    boost::multiprecision::cpp_dec_float_50 volume24{};
+    boost::multiprecision::cpp_dec_float_50 amount24{};
+    boost::multiprecision::cpp_dec_float_50 holdVol{};
+    std::int64_t timestamp{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
 struct Candle final : IJson {
     std::int64_t openTime{};
     boost::multiprecision::cpp_dec_float_50 open{};
