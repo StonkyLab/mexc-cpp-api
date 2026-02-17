@@ -10,6 +10,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #define INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
 
 #include "vk/interface/i_exchange_connector.h"
+#include "vk/mexc/mexc_models.h"
 #include "vk/utils/magic_enum_wrapper.hpp"
 #include "vk/common/module_factory.h"
 #include <memory>
@@ -51,6 +52,8 @@ public:
     [[nodiscard]] std::vector<FundingRate> getHistoricalFundingRates(const std::string &symbol, std::int64_t startTime, std::int64_t endTime) const override;
 
     [[nodiscard]] std::vector<Candle> getHistoricalCandles(const std::string &symbol, CandleInterval interval, std::int64_t startTime, std::int64_t endTime) const override;
+
+    [[nodiscard]] std::vector<mexc::futures::ContractDetail> getContractDetails(const std::string &symbol = "") const;
 
     static std::shared_ptr<IExchangeConnector> createInstance() {
         return std::make_shared<MEXCFuturesExchangeConnector>();

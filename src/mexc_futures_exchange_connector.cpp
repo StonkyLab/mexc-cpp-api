@@ -283,4 +283,8 @@ std::vector<Candle> MEXCFuturesExchangeConnector::getHistoricalCandles(
 
     return retVal;
 }
+
+std::vector<mexc::futures::ContractDetail> MEXCFuturesExchangeConnector::getContractDetails(const std::string &symbol) const {
+    return m_p->m_restClient->getContractDetails(symbol);
+}
 } // namespace vk
