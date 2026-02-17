@@ -12,6 +12,16 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/utils/magic_enum_wrapper.hpp"
 
 namespace vk::mexc {
+
+/// Contract state: 0=enabled, 1=delivery, 2=completed, 3=offline, 4=paused
+enum class ContractState : std::int32_t {
+	Enabled = 0,
+	Delivery = 1,
+	Completed = 2,
+	Offline = 3,
+	Paused = 4
+};
+
 enum class CandleInterval : std::int32_t {
 	_1m,
 	_5m,

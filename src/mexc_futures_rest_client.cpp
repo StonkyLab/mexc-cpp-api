@@ -113,6 +113,19 @@ std::int64_t RESTClient::getServerTime() const {
     return handleMEXCResponse<ServerTime>(response).serverTime;
 }
 
+std::vector<ContractDetail> RESTClient::getContractDetails(const std::string &symbol) const {
+    std::string path = "/api/v1/contract/detail";
+    std::map<std::string, std::string> parameters;
+
+    if (!symbol.empty()) {
+        parameters.insert_or_assign("symbol", symbol);
+    }
+
+    m_p->rateLimiter.wait();
+    const auto response = P::checkResponse(m_p->httpSession->methodGet(path, parameters));
+    return handleMEXCResponse<ContractDetails>(response).contractDetails;
+}
+
 FundingRate RESTClient::getContractFundingRate(const std::string &contract) const {
     const std::string path = "/api/v1/contract/funding_rate/" + contract;
     m_p->rateLimiter.wait();

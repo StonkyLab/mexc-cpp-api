@@ -39,6 +39,14 @@ public:
 	[[nodiscard]] std::int64_t getServerTime() const;
 
 	/**
+	 * Returns contract details for all contracts (or a specific one)
+	 * @param symbol optional contract name (returns all if empty)
+	 * @return vector of ContractDetail structures
+	 * @see https://www.mexc.com/api-docs/futures/market-endpoints#get-contract-info
+	 */
+	[[nodiscard]] std::vector<ContractDetail> getContractDetails(const std::string &symbol = "") const;
+
+	/**
 	 * Returns contract funding rate
 	 * @return FundingRate
 	 * @see https://www.mexc.com/api-docs/futures/market-endpoints#get-contract-funding-rate

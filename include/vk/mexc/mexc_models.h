@@ -12,6 +12,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <nlohmann/json.hpp>
 #include "vk/interface/i_json.h"
+#include "mexc_enums.h"
 
 namespace vk::mexc::spot {
 
@@ -170,6 +171,30 @@ struct Candle final : IJson {
 
 struct Candles final : Response {
     std::vector<Candle> candles{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct ContractDetail final : IJson {
+    std::string symbol{};
+    std::string displayNameEn{};
+    std::string baseCoin{};
+    std::string quoteCoin{};
+    std::string settleCoin{};
+    ContractState state{ContractState::Enabled};
+    bool apiAllowed{true};
+    std::int32_t automaticDelivery{};
+    std::vector<std::string> conceptPlate{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct ContractDetails final : Response {
+    std::vector<ContractDetail> contractDetails{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 

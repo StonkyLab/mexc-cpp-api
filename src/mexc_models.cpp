@@ -249,4 +249,46 @@ void Candles::fromJson(const nlohmann::json &json) {
         candles.push_back(candle);
     }
 }
+
+nlohmann::json ContractDetail::toJson() const {
+    throw std::runtime_error("Unimplemented: ContractDetail::toJson()");
+}
+
+void ContractDetail::fromJson(const nlohmann::json &json) {
+    readValue<std::string>(json, "symbol", symbol);
+    readValue<std::string>(json, "displayNameEn", displayNameEn);
+    readValue<std::string>(json, "baseCoin", baseCoin);
+    readValue<std::string>(json, "quoteCoin", quoteCoin);
+    readValue<std::string>(json, "settleCoin", settleCoin);
+    readValue<bool>(json, "apiAllowed", apiAllowed);
+    readValue<std::int32_t>(json, "automaticDelivery", automaticDelivery);
+
+    if (json.contains("state") && json["state"].is_number()) {
+        state = static_cast<ContractState>(json["state"].get<std::int32_t>());
+    }
+
+    if (json.contains("conceptPlate") && json["conceptPlate"].is_array()) {
+        for (const auto &item : json["conceptPlate"]) {
+            if (item.is_string()) {
+                conceptPlate.push_back(item.get<std::string>());
+            }
+        }
+    }
+}
+
+nlohmann::json ContractDetails::toJson() const {
+    throw std::runtime_error("Unimplemented: ContractDetails::toJson()");
+}
+
+void ContractDetails::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+
+    if (data.is_array()) {
+        for (const auto &item : data) {
+            ContractDetail detail;
+            detail.fromJson(item);
+            contractDetails.push_back(detail);
+        }
+    }
+}
 }
