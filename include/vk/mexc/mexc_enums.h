@@ -36,6 +36,17 @@ enum class CandleInterval : std::int32_t {
 };
 }
 
+namespace vk::mexc::futures {
+/// Order side: 1=open long, 2=close short, 3=open short, 4=close long
+enum class OrderSide : std::int32_t { OpenLong = 1, CloseShort = 2, OpenShort = 3, CloseLong = 4 };
+
+/// Order type: 1=limit, 2=post-only, 3=IOC, 4=FOK, 5=market, 6=market-to-limit
+enum class OrderType : std::int32_t { Limit = 1, PostOnly = 2, IOC = 3, FOK = 4, Market = 5, MarketToLimit = 6 };
+
+/// Margin type: 1=isolated, 2=cross
+enum class MarginType : std::int32_t { Isolated = 1, Cross = 2 };
+}
+
 template<>
 constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<vk::mexc::CandleInterval>(
 	const vk::mexc::CandleInterval value) noexcept {

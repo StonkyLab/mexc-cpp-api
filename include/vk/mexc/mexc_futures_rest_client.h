@@ -15,6 +15,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <functional>
 #include "mexc_models.h"
 #include "mexc_enums.h"
+#include "mexc_http_futures_session.h"
 
 namespace vk::mexc::futures {
 
@@ -25,11 +26,17 @@ class RESTClient {
 	std::unique_ptr<P> m_p{};
 
 public:
+	/// Construct with API key + secret (OpenAPI auth)
 	RESTClient(const std::string &apiKey, const std::string &apiSecret);
+
+	/// Construct with WEB session token
+	explicit RESTClient(const std::string &webToken, AuthSource source);
 
 	~RESTClient();
 
 	void setCredentials(const std::string &apiKey, const std::string &apiSecret) const;
+
+	void setWebToken(const std::string &webToken) const;
 
 	/**
 	 * Returns server time in ms
@@ -79,6 +86,38 @@ public:
 	 * @return WalletBalance
 	 */
 	[[nodiscard]] WalletBalance getWalletBalance(const std::string &currency) const;
+
+	/**
+	 * Returns contract ticker data (bid/ask prices, volume, etc.)
+	 * @param symbol contract symbol (e.g., BTC_USDT)
+	 * @return Ticker
+	 * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#get-contract-ticker
+	 */
+	[[nodiscard]] Ticker getContractTicker(const std::string &symbol) const;
+
+	/**
+	 * Returns current open positions (requires authentication)
+	 * @param symbol optional filter by symbol (empty = all positions)
+	 * @return vector of OpenPosition
+	 * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#get-all-informations-of-user-39-s-open-positions
+	 */
+	[[nodiscard]] std::vector<OpenPosition> getOpenPositions(const std::string &symbol = {}) const;
+
+	/**
+	 * Submit a futures order (requires WEB token auth)
+	 * @param request Order parameters
+	 * @return OrderResponse with order ID on success
+	 * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#order-under-maintenance
+	 */
+	[[nodiscard]] OrderResponse submitOrder(const OrderRequest &request) const;
+
+	/**
+	 * Cancel futures orders by ID (requires WEB token auth)
+	 * @param orderIds list of order IDs to cancel (max 50)
+	 * @return CancelOrderResponse with per-order results
+	 * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#cancel-the-order-under-maintenance
+	 */
+	[[nodiscard]] CancelOrderResponse cancelOrders(const std::vector<std::int64_t> &orderIds) const;
 
 	/**
 	 * Download historical candles
