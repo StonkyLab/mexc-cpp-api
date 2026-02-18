@@ -5,7 +5,7 @@ using namespace vk;
 void testTickerInfo() {
     const auto connector = std::make_unique<MEXCFuturesExchangeConnector>();
 
-    for (auto ticker : connector->getTickerInfo("BTCUSDT")) {
+    for (auto ticker : connector->getSymbolInfo("BTCUSDT")) {
         spdlog::info("Symbol: {}", ticker.symbol);
     }
 }

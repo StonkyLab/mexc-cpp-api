@@ -186,8 +186,8 @@ std::vector<FundingRate> MEXCFuturesExchangeConnector::getFundingRates() const {
     return retVal;
 }
 
-std::vector<Ticker> MEXCFuturesExchangeConnector::getTickerInfo(const std::string& symbol) const {
-    throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getTickerInfo");
+std::vector<Symbol> MEXCFuturesExchangeConnector::getSymbolInfo(const std::string& symbol) const {
+    throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getSymbolInfo");
 }
 
 std::int64_t MEXCFuturesExchangeConnector::getServerTime() const {
