@@ -53,8 +53,6 @@ public:
 
     [[nodiscard]] std::vector<Candle> getHistoricalCandles(const std::string &symbol, CandleInterval interval, std::int64_t startTime, std::int64_t endTime) const override;
 
-    [[nodiscard]] std::vector<mexc::futures::ContractDetail> getContractDetails(const std::string &symbol = "") const;
-
     static std::shared_ptr<IExchangeConnector> createInstance() {
         return std::make_shared<MEXCFuturesExchangeConnector>();
     }

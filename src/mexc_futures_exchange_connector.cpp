@@ -187,7 +187,26 @@ std::vector<FundingRate> MEXCFuturesExchangeConnector::getFundingRates() const {
 }
 
 std::vector<Symbol> MEXCFuturesExchangeConnector::getSymbolInfo(const std::string& symbol) const {
-    throw std::runtime_error("Unimplemented: MEXCFuturesExchangeConnector::getSymbolInfo");
+    const auto details = m_p->m_restClient->getContractDetails(symbol);
+    std::vector<Symbol> retVal;
+    retVal.reserve(details.size());
+
+    for (const auto& d : details) {
+        Symbol s;
+        s.symbol = d.symbol;
+        s.displayName = d.displayNameEn;
+        s.marketCategory = MarketCategory::Futures;
+        s.baseAsset = d.baseCoin;
+        s.quoteAsset = d.quoteCoin;
+        s.marginAsset = d.settleCoin;
+        s.contractSize = d.contractSize;
+        s.minVol = d.minVol;
+        s.maxVol = d.maxVol;
+        s.volUnit = d.volUnit;
+        retVal.push_back(s);
+    }
+
+    return retVal;
 }
 
 std::int64_t MEXCFuturesExchangeConnector::getServerTime() const {
@@ -284,7 +303,4 @@ std::vector<Candle> MEXCFuturesExchangeConnector::getHistoricalCandles(
     return retVal;
 }
 
-std::vector<mexc::futures::ContractDetail> MEXCFuturesExchangeConnector::getContractDetails(const std::string &symbol) const {
-    return m_p->m_restClient->getContractDetails(symbol);
-}
 } // namespace vk
