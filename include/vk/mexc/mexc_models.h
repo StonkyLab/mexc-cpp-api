@@ -273,6 +273,13 @@ struct ContractDetail final : IJson {
     ContractState state{ContractState::Enabled};
     bool apiAllowed{true};
     std::int32_t automaticDelivery{};
+    double contractSize{1.0};
+    std::int32_t minVol{1};
+    std::int32_t maxVol{1000000};
+    std::int32_t volUnit{1};
+    std::int32_t priceUnit{1};
+    std::int32_t pricePrecision{2};
+    std::int32_t volPrecision{0};
     std::vector<std::string> conceptPlate{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
