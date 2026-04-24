@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_EVENT_MODELS_V5_H
-#define INCLUDE_VK_MEXC_EVENT_MODELS_V5_H
+#ifndef INCLUDE_STONKY_MEXC_EVENT_MODELS_V5_H
+#define INCLUDE_STONKY_MEXC_EVENT_MODELS_V5_H
 
 #include "mexc_enums.h"
-#include "vk/interface/i_json.h"
+#include "stonky/interface/i_json.h"
 #include <nlohmann/json.hpp>
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 struct WSSubscriptionParameters final : IJson {
 	std::string symbol{};
 	std::string interval{};
@@ -83,4 +83,4 @@ struct EventCandlestick final : IJson {
 	void fromJson(const nlohmann::json &json) override;
 };
 }
-#endif //INCLUDE_VK_MEXC_EVENT_MODELS_V5_H
+#endif //INCLUDE_STONKY_MEXC_EVENT_MODELS_V5_H

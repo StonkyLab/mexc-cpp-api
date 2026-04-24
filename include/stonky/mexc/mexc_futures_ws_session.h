@@ -6,16 +6,16 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_WS_SESSION_V5_H
-#define INCLUDE_VK_MEXC_WS_SESSION_V5_H
+#ifndef INCLUDE_STONKY_MEXC_WS_SESSION_V5_H
+#define INCLUDE_STONKY_MEXC_WS_SESSION_V5_H
 
-#include "vk/utils/log_utils.h"
-#include "vk/mexc/mexc_event_models.h"
+#include "stonky/utils/log_utils.h"
+#include "stonky/mexc/mexc_event_models.h"
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <memory>
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 using onDataEvent = std::function<void(const Event& event)>;
 
 class WebSocketSession final : public std::enable_shared_from_this<WebSocketSession> {
@@ -58,4 +58,4 @@ public:
     [[nodiscard]] bool isSubscribed(const nlohmann::json &subscriptionRequest) const;
 };
 }
-#endif //INCLUDE_VK_MEXC_WS_SESSION_V5_H
+#endif //INCLUDE_STONKY_MEXC_WS_SESSION_V5_H

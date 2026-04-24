@@ -6,16 +6,16 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
-#define INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
+#ifndef INCLUDE_STONKY_MEXC_EXCHANGE_CONNECTOR_H
+#define INCLUDE_STONKY_MEXC_EXCHANGE_CONNECTOR_H
 
-#include "vk/interface/i_exchange_connector.h"
-#include "vk/mexc/mexc_models.h"
-#include "vk/utils/magic_enum_wrapper.hpp"
-#include "vk/common/module_factory.h"
+#include "stonky/interface/i_exchange_connector.h"
+#include "stonky/mexc/mexc_models.h"
+#include "stonky/utils/magic_enum_wrapper.hpp"
+#include "stonky/common/module_factory.h"
 #include <memory>
 
-namespace vk {
+namespace stonky {
 class MEXCFuturesExchangeConnector final : public IExchangeConnector {
     struct P;
     std::unique_ptr<P> m_p{};
@@ -76,4 +76,4 @@ BOOST_SYMBOL_EXPORT IModuleFactory* getModuleFactory() {
     return g_moduleFactory;
 }
 }
-#endif //INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
+#endif //INCLUDE_STONKY_MEXC_EXCHANGE_CONNECTOR_H

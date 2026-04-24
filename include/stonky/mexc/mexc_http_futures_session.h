@@ -6,8 +6,8 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_HTTP_FUTURES_SESSION_H
-#define INCLUDE_VK_MEXC_HTTP_FUTURES_SESSION_H
+#ifndef INCLUDE_STONKY_MEXC_HTTP_FUTURES_SESSION_H
+#define INCLUDE_STONKY_MEXC_HTTP_FUTURES_SESSION_H
 
 #include <boost/asio/connect.hpp>
 #include <boost/beast/core.hpp>
@@ -15,7 +15,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include <string>
 #include <map>
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -46,4 +46,4 @@ public:
     [[nodiscard]] http::response<http::string_body> methodPost(const std::string &path, const std::string &jsonBody) const;
 };
 }
-#endif // INCLUDE_VK_MEXC_HTTP_FUTURES_SESSION_H
+#endif // INCLUDE_STONKY_MEXC_HTTP_FUTURES_SESSION_H

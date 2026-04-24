@@ -6,11 +6,11 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/mexc/mexc_event_models.h"
-#include "vk/utils/utils.h"
-#include "vk/utils/json_utils.h"
+#include "stonky/mexc/mexc_event_models.h"
+#include "stonky/utils/utils.h"
+#include "stonky/utils/json_utils.h"
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 nlohmann::json WSSubscriptionParameters::toJson() const {
 	nlohmann::json result;
 	result["symbol"] = symbol;

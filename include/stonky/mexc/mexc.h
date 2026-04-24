@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_API_H
-#define INCLUDE_VK_MEXC_API_H
+#ifndef INCLUDE_STONKY_MEXC_API_H
+#define INCLUDE_STONKY_MEXC_API_H
 
-#include "vk/mexc/mexc_models.h"
-#include "vk/mexc/mexc_enums.h"
+#include "stonky/mexc/mexc_models.h"
+#include "stonky/mexc/mexc_enums.h"
 
-namespace vk::mexc {
+namespace stonky::mexc {
 enum class CandleInterval;
 
 class MEXC {
@@ -23,4 +23,4 @@ public:
     static std::string candleIntervalToSpotString(CandleInterval candleInterval);
 };
 }
-#endif // INCLUDE_VK_MEXC_API_H
+#endif // INCLUDE_STONKY_MEXC_API_H

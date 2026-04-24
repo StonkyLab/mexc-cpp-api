@@ -7,9 +7,9 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
 #include <vk/mexc/mexc_futures_exchange_connector.h>
-#include "vk/mexc/mexc_futures_rest_client.h"
+#include "stonky/mexc/mexc_futures_rest_client.h"
 
-namespace vk {
+namespace stonky {
 
 namespace {
 /// Map common CandleInterval (seconds-based) to MEXC CandleInterval (name-based)
@@ -303,4 +303,4 @@ std::vector<Candle> MEXCFuturesExchangeConnector::getHistoricalCandles(
     return retVal;
 }
 
-} // namespace vk
+} // namespace stonky

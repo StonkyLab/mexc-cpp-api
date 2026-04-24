@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_HTTP_SPOT_SESSION_H
-#define INCLUDE_VK_MEXC_HTTP_SPOT_SESSION_H
+#ifndef INCLUDE_STONKY_MEXC_HTTP_SPOT_SESSION_H
+#define INCLUDE_STONKY_MEXC_HTTP_SPOT_SESSION_H
 
 #include <boost/beast/http.hpp>
 #include <string>
 #include <map>
 
-namespace vk::mexc::spot {
+namespace stonky::mexc::spot {
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
@@ -46,4 +46,4 @@ public:
                                                                bool isPublic = true) const;
 };
 }
-#endif // INCLUDE_VK_MEXC_HTTP_SPOT_SESSION_H
+#endif // INCLUDE_STONKY_MEXC_HTTP_SPOT_SESSION_H

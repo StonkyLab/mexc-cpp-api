@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/mexc/mexc_http_spot_session.h"
+#include "stonky/mexc/mexc_http_spot_session.h"
 #include "nlohmann/json.hpp"
 #include <boost/asio/ssl.hpp>
 #include <boost/beast/version.hpp>
@@ -14,9 +14,9 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include <boost/asio/connect.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
 #include "date.h"
-#include "vk/utils/utils.h"
+#include "stonky/utils/utils.h"
 
-namespace vk::mexc::spot {
+namespace stonky::mexc::spot {
 namespace ssl = boost::asio::ssl;
 using tcp = net::ip::tcp;
 

@@ -6,17 +6,17 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/mexc/mexc_futures_rest_client.h"
-#include "vk/mexc/mexc_ws_stream_manager.h"
-#include "vk/mexc/mexc_futures_ws_client.h"
-#include "vk/utils/utils.h"
+#include "stonky/mexc/mexc_futures_rest_client.h"
+#include "stonky/mexc/mexc_ws_stream_manager.h"
+#include "stonky/mexc/mexc_futures_ws_client.h"
+#include "stonky/utils/utils.h"
 #include <mutex>
 #include <fmt/format.h>
 #include <thread>
 
 using namespace std::chrono_literals;
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 struct WSStreamManager::P {
 	std::unique_ptr<WSClient> wsClient;
 	int timeout{5};

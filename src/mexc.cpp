@@ -6,9 +6,9 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/mexc/mexc.h"
+#include "stonky/mexc/mexc.h"
 
-namespace vk::mexc {
+namespace stonky::mexc {
 int64_t MEXC::numberOfMsForCandleInterval(const CandleInterval candleInterval) {
     switch (candleInterval) {
     case CandleInterval::_1m:

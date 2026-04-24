@@ -6,20 +6,20 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/mexc/mexc_spot_rest_client.h"
-#include "vk/mexc/mexc_http_futures_session.h"
-#include "vk/mexc/mexc.h"
-#include "vk/utils/utils.h"
-#include "vk/utils/json_utils.h"
+#include "stonky/mexc/mexc_spot_rest_client.h"
+#include "stonky/mexc/mexc_http_futures_session.h"
+#include "stonky/mexc/mexc.h"
+#include "stonky/utils/utils.h"
+#include "stonky/utils/json_utils.h"
 #include <fmt/format.h>
 #include <mutex>
 
-#include "vk/mexc/mexc_http_spot_session.h"
+#include "stonky/mexc/mexc_http_spot_session.h"
 #include <deque>
 #include <thread>
 #include <chrono>
 
-namespace vk::mexc::spot {
+namespace stonky::mexc::spot {
 
 struct RateLimiter {
     std::mutex mutex;

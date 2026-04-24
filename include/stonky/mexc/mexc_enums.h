@@ -6,12 +6,12 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_ENUMS_H
-#define INCLUDE_VK_MEXC_ENUMS_H
+#ifndef INCLUDE_STONKY_MEXC_ENUMS_H
+#define INCLUDE_STONKY_MEXC_ENUMS_H
 
-#include "vk/utils/magic_enum_wrapper.hpp"
+#include "stonky/utils/magic_enum_wrapper.hpp"
 
-namespace vk::mexc {
+namespace stonky::mexc {
 
 /// Contract state: 0=enabled, 1=delivery, 2=completed, 3=offline, 4=paused
 enum class ContractState : std::int32_t {
@@ -36,7 +36,7 @@ enum class CandleInterval : std::int32_t {
 };
 }
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 /// Order side: 1=open long, 2=close short, 3=open short, 4=close long
 enum class OrderSide : std::int32_t { OpenLong = 1, CloseShort = 2, OpenShort = 3, CloseLong = 4 };
 
@@ -48,28 +48,28 @@ enum class MarginType : std::int32_t { Isolated = 1, Cross = 2 };
 }
 
 template<>
-constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<vk::mexc::CandleInterval>(
-	const vk::mexc::CandleInterval value) noexcept {
+constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<stonky::mexc::CandleInterval>(
+	const stonky::mexc::CandleInterval value) noexcept {
 	switch (value) {
-		case vk::mexc::CandleInterval::_1m:
+		case stonky::mexc::CandleInterval::_1m:
 			return "Min1";
-		case vk::mexc::CandleInterval::_5m:
+		case stonky::mexc::CandleInterval::_5m:
 			return "Min5";
-		case vk::mexc::CandleInterval::_15m:
+		case stonky::mexc::CandleInterval::_15m:
 			return "Min15";
-		case vk::mexc::CandleInterval::_30m:
+		case stonky::mexc::CandleInterval::_30m:
 			return "Min30";
-		case vk::mexc::CandleInterval::_60m:
+		case stonky::mexc::CandleInterval::_60m:
 			return "Min60";
-		case vk::mexc::CandleInterval::_4h:
+		case stonky::mexc::CandleInterval::_4h:
 			return "Hour4";
-		case vk::mexc::CandleInterval::_8h:
+		case stonky::mexc::CandleInterval::_8h:
 			return "Hour8";
-		case vk::mexc::CandleInterval::_1d:
+		case stonky::mexc::CandleInterval::_1d:
 			return "Day1";
-		case vk::mexc::CandleInterval::_1W:
+		case stonky::mexc::CandleInterval::_1W:
 			return "Week1";
-		case vk::mexc::CandleInterval::_1M:
+		case stonky::mexc::CandleInterval::_1M:
 			return "Month1";
 		default: ;
 	}
@@ -77,4 +77,4 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<vk
 	return default_tag;
 }
 
-#endif // INCLUDE_VK_MEXC_ENUMS_H
+#endif // INCLUDE_STONKY_MEXC_ENUMS_H

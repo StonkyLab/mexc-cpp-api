@@ -6,11 +6,11 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/mexc/mexc_models.h"
-#include "vk/utils/utils.h"
-#include "vk/utils/json_utils.h"
+#include "stonky/mexc/mexc_models.h"
+#include "stonky/utils/utils.h"
+#include "stonky/utils/json_utils.h"
 
-namespace vk::mexc::spot {
+namespace stonky::mexc::spot {
 nlohmann::json Response::toJson() const {
     throw std::runtime_error("Unimplemented: Response::toJson()");
 }
@@ -81,7 +81,7 @@ void ListenKeys::fromJson(const nlohmann::json &json) {
 }
 }
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 nlohmann::json Response::toJson() const {
     throw std::runtime_error("Unimplemented: Response::toJson()");
 }

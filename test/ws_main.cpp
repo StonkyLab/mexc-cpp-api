@@ -1,31 +1,31 @@
 #include <spdlog/spdlog.h>
 
-#include "vk/mexc/mexc.h"
-#include "vk/mexc/mexc_futures_ws_client.h"
-#include "vk/mexc/mexc_ws_stream_manager.h"
-#include "vk/utils/json_utils.h"
+#include "stonky/mexc/mexc.h"
+#include "stonky/mexc/mexc_futures_ws_client.h"
+#include "stonky/mexc/mexc_ws_stream_manager.h"
+#include "stonky/utils/json_utils.h"
 
 using namespace std::chrono_literals;
-using namespace vk::mexc;
+using namespace stonky::mexc;
 
-void logFunction(const vk::LogSeverity severity, const std::string &errmsg) {
+void logFunction(const stonky::LogSeverity severity, const std::string &errmsg) {
 	switch (severity) {
-		case vk::LogSeverity::Info:
+		case stonky::LogSeverity::Info:
 			spdlog::info(errmsg);
 			break;
-		case vk::LogSeverity::Warning:
+		case stonky::LogSeverity::Warning:
 			spdlog::warn(errmsg);
 			break;
-		case vk::LogSeverity::Critical:
+		case stonky::LogSeverity::Critical:
 			spdlog::critical(errmsg);
 			break;
-		case vk::LogSeverity::Error:
+		case stonky::LogSeverity::Error:
 			spdlog::error(errmsg);
 			break;
-		case vk::LogSeverity::Debug:
+		case stonky::LogSeverity::Debug:
 			spdlog::debug(errmsg);
 			break;
-		case vk::LogSeverity::Trace:
+		case stonky::LogSeverity::Trace:
 			spdlog::trace(errmsg);
 			break;
 	}
@@ -36,7 +36,7 @@ void testWSClient() {
 
 	wsClient.setDataEventCallback([&](const futures::Event &event) {
 		if (event.channel == "push.ticker") {
-			defaultLogFunction(vk::LogSeverity::Info, event.data.dump());
+			defaultLogFunction(stonky::LogSeverity::Info, event.data.dump());
 		}
 	}); {
 		futures::WSSubscription subscriptionRequest;

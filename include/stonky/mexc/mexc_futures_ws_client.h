@@ -6,16 +6,16 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_FUTURES_WS_CLIENT_H
-#define INCLUDE_VK_MEXC_FUTURES_WS_CLIENT_H
+#ifndef INCLUDE_STONKY_MEXC_FUTURES_WS_CLIENT_H
+#define INCLUDE_STONKY_MEXC_FUTURES_WS_CLIENT_H
 
 #include <memory>
 
-#include "vk/utils/log_utils.h"
-#include "vk/utils/utils.h"
+#include "stonky/utils/log_utils.h"
+#include "stonky/utils/utils.h"
 #include "mexc_futures_ws_session.h"
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 class WSClient : public noncopyable {
     struct P;
     std::unique_ptr<P> m_p{};
@@ -57,4 +57,4 @@ public:
 };
 };
 
-#endif //INCLUDE_VK_MEXC_FUTURES_WS_CLIENT_H
+#endif //INCLUDE_STONKY_MEXC_FUTURES_WS_CLIENT_H

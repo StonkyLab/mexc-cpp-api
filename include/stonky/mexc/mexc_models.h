@@ -6,15 +6,15 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_MODELS_H
-#define INCLUDE_VK_MEXC_MODELS_H
+#ifndef INCLUDE_STONKY_MEXC_MODELS_H
+#define INCLUDE_STONKY_MEXC_MODELS_H
 
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <nlohmann/json.hpp>
-#include "vk/interface/i_json.h"
+#include "stonky/interface/i_json.h"
 #include "mexc_enums.h"
 
-namespace vk::mexc::spot {
+namespace stonky::mexc::spot {
 
 struct Response : IJson {
     int code{};
@@ -77,7 +77,7 @@ struct ListenKeys final : Response {
 };
 }
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 struct Response : IJson {
     int code{};
     bool success{};
@@ -296,4 +296,4 @@ struct ContractDetails final : Response {
 };
 }
 
-#endif // INCLUDE_VK_MEXC_MODELS_H
+#endif // INCLUDE_STONKY_MEXC_MODELS_H

@@ -7,8 +7,8 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
 
-#ifndef INCLUDE_VK_MEXC_FUTURES_REST_CLIENT_H
-#define INCLUDE_VK_MEXC_FUTURES_REST_CLIENT_H
+#ifndef INCLUDE_STONKY_MEXC_FUTURES_REST_CLIENT_H
+#define INCLUDE_STONKY_MEXC_FUTURES_REST_CLIENT_H
 
 #include <string>
 #include <memory>
@@ -17,7 +17,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include "mexc_enums.h"
 #include "mexc_http_futures_session.h"
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 
 using onCandlesDownloaded = std::function<void(const std::vector<Candle>&)>;
 
@@ -136,4 +136,4 @@ public:
 };
 }
 
-#endif //INCLUDE_VK_MEXC_FUTURES_REST_CLIENT_H
+#endif //INCLUDE_STONKY_MEXC_FUTURES_REST_CLIENT_H

@@ -6,8 +6,8 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/mexc/mexc_futures_rest_client.h"
-#include "vk/mexc/mexc_http_futures_session.h"
+#include "stonky/mexc/mexc_futures_rest_client.h"
+#include "stonky/mexc/mexc_http_futures_session.h"
 #include <spdlog/fmt/ostr.h>
 #include <algorithm>
 #include <deque>
@@ -15,7 +15,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include <chrono>
 #include <mutex>
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 
 struct RateLimiter {
     std::mutex mutex;

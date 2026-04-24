@@ -1,15 +1,15 @@
-#include "vk/mexc/mexc.h"
-#include "vk/mexc/mexc_spot_rest_client.h"
-#include "vk/utils/json_utils.h"
+#include "stonky/mexc/mexc.h"
+#include "stonky/mexc/mexc_spot_rest_client.h"
+#include "stonky/utils/json_utils.h"
 #include <memory>
 #include <fstream>
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ranges.h>
 #include <future>
-#include "vk/mexc/mexc_enums.h"
-#include "vk/utils/utils.h"
+#include "stonky/mexc/mexc_enums.h"
+#include "stonky/utils/utils.h"
 
-using namespace vk::mexc;
+using namespace stonky::mexc;
 using namespace std::chrono_literals;
 
 constexpr int HISTORY_LENGTH_IN_S = 86400 * 7; // 7 days
@@ -27,8 +27,8 @@ std::pair<std::string, std::string> readCredentials(const char *path) {
     std::string subAccountName;
 
     nlohmann::json json = nlohmann::json::parse(ifs);
-    vk::readValue<std::string>(json, "ApiKey", apiKey);
-    vk::readValue<std::string>(json, "ApiSecret", apiSecret);
+    stonky::readValue<std::string>(json, "ApiKey", apiKey);
+    stonky::readValue<std::string>(json, "ApiSecret", apiSecret);
 
     std::pair retVal(apiKey, apiSecret);
 

@@ -6,8 +6,8 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_MEXC_REST_SPOT_CLIENT_H
-#define INCLUDE_VK_MEXC_REST_SPOT_CLIENT_H
+#ifndef INCLUDE_STONKY_MEXC_REST_SPOT_CLIENT_H
+#define INCLUDE_STONKY_MEXC_REST_SPOT_CLIENT_H
 
 #include <string>
 #include <memory>
@@ -15,7 +15,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include "mexc_models.h"
 #include "mexc_enums.h"
 
-namespace vk::mexc::spot {
+namespace stonky::mexc::spot {
 
 using onCandlesDownloaded = std::function<void(const std::vector<Candle>&)>;
 
@@ -98,4 +98,4 @@ public:
 };
 }
 
-#endif // INCLUDE_VK_MEXC_REST_SPOT_CLIENT_H
+#endif // INCLUDE_STONKY_MEXC_REST_SPOT_CLIENT_H

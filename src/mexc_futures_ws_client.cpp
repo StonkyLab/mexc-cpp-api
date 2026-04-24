@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/mexc/mexc_futures_ws_client.h"
+#include "stonky/mexc/mexc_futures_ws_client.h"
 
 #include <boost/asio/ssl/context.hpp>
 #include <boost/beast/core.hpp>
 #include <thread>
 
-namespace vk::mexc::futures {
+namespace stonky::mexc::futures {
 static auto MEXC_FUTURES_WS_HOST = "contract.mexc.com";
 static auto MEXC_FUTURES_WS_PORT = "443";
 
