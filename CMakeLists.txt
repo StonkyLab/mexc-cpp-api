@@ -26,18 +26,18 @@ if (NOT TARGET vk_common)
 endif()
 
 set(HEADERS
-        include/vk/mexc/mexc.h
-        include/vk/mexc/mexc_enums.h
-        include/vk/mexc/mexc_http_futures_session.h
-        include/vk/mexc/mexc_http_spot_session.h
-        include/vk/mexc/mexc_models.h
-        include/vk/mexc/mexc_spot_rest_client.h
-        include/vk/mexc/mexc_futures_rest_client.h
-        include/vk/mexc/mexc_futures_exchange_connector.h
-        include/vk/mexc/mexc_futures_ws_session.h
-        include/vk/mexc/mexc_futures_ws_client.h
-        include/vk/mexc/mexc_event_models.h
-        include/vk/mexc/mexc_ws_stream_manager.h
+        include/stonky/mexc/mexc.h
+        include/stonky/mexc/mexc_enums.h
+        include/stonky/mexc/mexc_http_futures_session.h
+        include/stonky/mexc/mexc_http_spot_session.h
+        include/stonky/mexc/mexc_models.h
+        include/stonky/mexc/mexc_spot_rest_client.h
+        include/stonky/mexc/mexc_futures_rest_client.h
+        include/stonky/mexc/mexc_futures_exchange_connector.h
+        include/stonky/mexc/mexc_futures_ws_session.h
+        include/stonky/mexc/mexc_futures_ws_client.h
+        include/stonky/mexc/mexc_event_models.h
+        include/stonky/mexc/mexc_ws_stream_manager.h
 )
 
 set(SOURCES
