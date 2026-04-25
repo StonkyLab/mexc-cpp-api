@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include <vk/mexc/mexc_futures_exchange_connector.h>
+#include <stonky/mexc/mexc_futures_exchange_connector.h>
 #include "stonky/mexc/mexc_futures_rest_client.h"
 
 namespace stonky {
