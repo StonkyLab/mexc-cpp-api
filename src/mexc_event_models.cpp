@@ -91,4 +91,50 @@ void EventCandlestick::fromJson(const nlohmann::json &json) {
 	readValue<double>(json, "q", volume);
 	readValue<std::int64_t>(json, "t", start);
 }
+
+nlohmann::json EventOrder::toJson() const {
+	throw std::runtime_error("Unimplemented: EventOrder::toJson()");
+}
+
+void EventOrder::fromJson(const nlohmann::json &json) {
+	readValue<std::int64_t>(json, "orderId", orderId);
+	readValue<std::string>(json, "symbol", symbol);
+	readValue<std::string>(json, "externalOid", externalOid);
+
+	/// MEXC sends the enums as integers (1..N), not names — read the int and cast.
+	std::int32_t sideRaw{1}, typeRaw{1}, stateRaw{1};
+	readValue<std::int32_t>(json, "side", sideRaw);
+	readValue<std::int32_t>(json, "orderType", typeRaw);
+	readValue<std::int32_t>(json, "state", stateRaw);
+	side = static_cast<OrderSide>(sideRaw);
+	orderType = static_cast<OrderType>(typeRaw);
+	state = static_cast<OrderState>(stateRaw);
+
+	readValue<double>(json, "price", price);
+	readValue<double>(json, "vol", vol);
+	readValue<double>(json, "dealVol", dealVol);
+	readValue<double>(json, "dealAvgPrice", dealAvgPrice);
+	readValue<std::int32_t>(json, "errorCode", errorCode);
+	readValue<std::int64_t>(json, "updateTime", updateTime);
+}
+
+nlohmann::json EventDeal::toJson() const {
+	throw std::runtime_error("Unimplemented: EventDeal::toJson()");
+}
+
+void EventDeal::fromJson(const nlohmann::json &json) {
+	readValue<std::int64_t>(json, "id", id);
+	readValue<std::int64_t>(json, "orderId", orderId);
+	readValue<std::string>(json, "symbol", symbol);
+
+	std::int32_t sideRaw{1};
+	readValue<std::int32_t>(json, "side", sideRaw);
+	side = static_cast<OrderSide>(sideRaw);
+
+	readValue<double>(json, "price", price);
+	readValue<double>(json, "vol", vol);
+	readValue<double>(json, "fee", fee);
+	readValue<bool>(json, "isTaker", isTaker);
+	readValue<std::int64_t>(json, "timestamp", timestamp);
+}
 }

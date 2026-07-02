@@ -61,6 +61,10 @@ struct EventTicker final : IJson {
 	double fairPrice{};
 	double fundingRate{};
 	std::int64_t timestamp{};
+	/// Local steady-clock receipt time (ms), stamped by WSStreamManager on every
+	/// update. Not part of the wire — lets consumers measure quote age without
+	/// trusting exchange clocks.
+	std::int64_t receivedTimestamp{};
 
 	[[nodiscard]] nlohmann::json toJson() const override;
 
@@ -77,6 +81,52 @@ struct EventCandlestick final : IJson {
 	double close{};
 	double volume{};
 	std::int64_t start{};
+
+	[[nodiscard]] nlohmann::json toJson() const override;
+
+	void fromJson(const nlohmann::json &json) override;
+};
+
+/**
+ * One order state change from the private "push.personal.order" channel.
+ * Numeric fields arrive as JSON numbers. `vol`/`dealVol` are in CONTRACTS.
+ * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#private-channels
+ */
+struct EventOrder final : IJson {
+	std::int64_t orderId{};
+	std::string symbol{};
+	std::string externalOid{};   ///< client-set order id (= our clientOrderId)
+	OrderSide side{OrderSide::OpenLong};
+	OrderType orderType{OrderType::Limit};
+	OrderState state{OrderState::New};
+	double price{};
+	double vol{};                ///< order size in contracts
+	double dealVol{};            ///< filled size in contracts
+	double dealAvgPrice{};
+	std::int32_t errorCode{};    ///< 0 = EC_NoError
+	std::int64_t updateTime{};
+
+	[[nodiscard]] nlohmann::json toJson() const override;
+
+	void fromJson(const nlohmann::json &json) override;
+};
+
+/**
+ * One fill from the private "push.personal.order.deal" channel. Carries the
+ * venue orderId but NOT the externalOid — the gateway maps orderId back to the
+ * client order id. `vol` is in CONTRACTS.
+ * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#private-channels
+ */
+struct EventDeal final : IJson {
+	std::int64_t id{};           ///< trade/fill id — dedup key
+	std::int64_t orderId{};
+	std::string symbol{};
+	OrderSide side{OrderSide::OpenLong};
+	double price{};
+	double vol{};                ///< fill size in contracts
+	double fee{};
+	bool isTaker{false};
+	std::int64_t timestamp{};
 
 	[[nodiscard]] nlohmann::json toJson() const override;
 

@@ -38,6 +38,7 @@ set(HEADERS
         include/stonky/mexc/mexc_futures_ws_client.h
         include/stonky/mexc/mexc_event_models.h
         include/stonky/mexc/mexc_ws_stream_manager.h
+        include/stonky/mexc/mexc_ws_private_stream_manager.h
 )
 
 set(SOURCES
@@ -52,6 +53,7 @@ set(SOURCES
         src/mexc_futures_ws_session.cpp
         src/mexc_event_models.cpp
         src/mexc_ws_stream_manager.cpp
+        src/mexc_ws_private_stream_manager.cpp
 )
 
 if (MODULE_MANAGER)

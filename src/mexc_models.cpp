@@ -89,6 +89,7 @@ nlohmann::json Response::toJson() const {
 void Response::fromJson(const nlohmann::json &json) {
     readValue<int>(json, "code", code);
     readValue<bool>(json, "success", success);
+    readValue<std::string>(json, "message", msg);
 
     if (json.contains("data")) {
         data = json["data"];
@@ -461,7 +462,7 @@ void ContractDetail::fromJson(const nlohmann::json &json) {
     readValue<std::int32_t>(json, "minVol", minVol);
     readValue<std::int32_t>(json, "maxVol", maxVol);
     readValue<std::int32_t>(json, "volUnit", volUnit);
-    readValue<std::int32_t>(json, "priceUnit", priceUnit);
+    readValue<double>(json, "priceUnit", priceUnit);
     readValue<std::int32_t>(json, "pricePrecision", pricePrecision);
     readValue<std::int32_t>(json, "volPrecision", volPrecision);
 
@@ -491,6 +492,11 @@ void ContractDetails::fromJson(const nlohmann::json &json) {
             detail.fromJson(item);
             contractDetails.push_back(detail);
         }
+    } else if (data.is_object()) {
+        /// A single-symbol query returns one object, not an array.
+        ContractDetail detail;
+        detail.fromJson(data);
+        contractDetails.push_back(detail);
     }
 }
 }

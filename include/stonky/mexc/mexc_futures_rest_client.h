@@ -115,6 +115,17 @@ public:
 	[[nodiscard]] CancelOrderResponse cancelOrders(const std::vector<std::int64_t> &orderIds) const;
 
 	/**
+	 * Cancel a single order by its client-set external order id (OpenAPI auth).
+	 * Cancelling by externalOid (rather than the venue orderId) needs no
+	 * orderId lookup, so it works even when the submit response was lost.
+	 * @param symbol contract symbol (e.g., BTC_USDT)
+	 * @param externalOid the externalOid set on the order at submit time
+	 * @return OrderResponse (success + venue orderId)
+	 * @see https://www.mexc.com/api-docs/futures/account-and-trading-endpoints
+	 */
+	[[nodiscard]] OrderResponse cancelOrderByExternalOid(const std::string &symbol, const std::string &externalOid) const;
+
+	/**
 	 * Download historical candles
 	 * @param symbol e.g. BTC_USDT
 	 * @param interval candle interval

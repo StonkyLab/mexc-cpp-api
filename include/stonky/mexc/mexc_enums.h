@@ -45,6 +45,11 @@ enum class OrderType : std::int32_t { Limit = 1, PostOnly = 2, IOC = 3, FOK = 4,
 
 /// Margin type: 1=isolated, 2=cross
 enum class MarginType : std::int32_t { Isolated = 1, Cross = 2 };
+
+/// Order state on the private push.personal.order channel:
+/// 1=new/uninformed, 2=uncompleted (resting, maybe partial), 3=completed (filled),
+/// 4=cancelled (may carry a partial dealVol), 5=invalid (rejected)
+enum class OrderState : std::int32_t { New = 1, Uncompleted = 2, Completed = 3, Cancelled = 4, Invalid = 5 };
 }
 
 template<>

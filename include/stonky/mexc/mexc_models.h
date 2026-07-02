@@ -81,6 +81,7 @@ namespace stonky::mexc::futures {
 struct Response : IJson {
     int code{};
     bool success{};
+    std::string msg{};   ///< error message on failure (MEXC "message"); empty on success
     nlohmann::json data{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
@@ -277,7 +278,7 @@ struct ContractDetail final : IJson {
     std::int32_t minVol{1};
     std::int32_t maxVol{1000000};
     std::int32_t volUnit{1};
-    std::int32_t priceUnit{1};
+    double priceUnit{0.1};   ///< actual price tick in quote terms (e.g. 0.1 USDT), NOT an integer
     std::int32_t pricePrecision{2};
     std::int32_t volPrecision{0};
     std::vector<std::string> conceptPlate{};

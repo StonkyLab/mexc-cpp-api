@@ -57,7 +57,7 @@ ValueType handleMEXCResponse(const http::response<http::string_body>& response) 
 
     if (!retVal.success) {
         throw std::runtime_error(
-            fmt::format("MEXC API error, code: {}", retVal.code).c_str());
+            fmt::format("MEXC API error, code: {}, msg: {}", retVal.code, retVal.msg).c_str());
     }
 
     return retVal;
@@ -203,6 +203,19 @@ CancelOrderResponse RESTClient::cancelOrders(const std::vector<std::int64_t> &or
     m_p->rateLimiter.wait();
     const auto response = P::checkResponse(m_p->httpSession->methodPost(path, jsonBody));
     return handleMEXCResponse<CancelOrderResponse>(response);
+}
+
+OrderResponse RESTClient::cancelOrderByExternalOid(const std::string &symbol, const std::string &externalOid) const {
+    const std::string path = "/api/v1/private/order/cancel_with_external";
+    nlohmann::json body;
+    body["symbol"] = symbol;
+    body["externalOid"] = externalOid;
+    // dump(-1): the signed body must byte-match what is sent
+    const std::string jsonBody = body.dump(-1);
+
+    m_p->rateLimiter.wait();
+    const auto response = P::checkResponse(m_p->httpSession->methodPost(path, jsonBody));
+    return handleMEXCResponse<OrderResponse>(response);
 }
 
 std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, const CandleInterval interval,

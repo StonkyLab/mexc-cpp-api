@@ -31,6 +31,24 @@ public:
     void run() const;
 
     /**
+     * Override the stream endpoint. Call before the first subscribe()/connect().
+     * Defaults to contract.mexc.com:443, path /edge.
+     */
+    void setEndpoint(const std::string& host, const std::string& port, const std::string& path) const;
+
+    /**
+     * Set API credentials for a private stream. Call before connect(). The
+     * session then logs in after every (re)connect.
+     */
+    void setCredentials(const std::string& apiKey, const std::string& apiSecret) const;
+
+    /**
+     * Start a login-only (private) session — no channel subscription; MEXC
+     * auto-pushes the personal channels after login. Requires setCredentials.
+     */
+    void connect() const;
+
+    /**
      * Set logger callback, if no set then all errors are writen to the stderr stream only
      * @param onLogMessageCB
      */
@@ -49,11 +67,23 @@ public:
     void subscribe(const nlohmann::json &subscriptionRequest) const;
 
     /**
+     * Unsubscribe a previously subscribed request. No-op when unknown.
+     * @param subscriptionRequest
+     */
+    void unsubscribe(const nlohmann::json &subscriptionRequest) const;
+
+    /**
      * Check if a stream is already subscribed
      * @param subscriptionRequest subscription request
      * @return True if subscribed
      */
     [[nodiscard]] bool isSubscribed(const nlohmann::json &subscriptionRequest) const;
+
+    /**
+     * True once the private session authenticated its CURRENT connection.
+     * Always false without credentials.
+     */
+    [[nodiscard]] bool isAuthenticated() const;
 };
 };
 

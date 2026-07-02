@@ -15,19 +15,38 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 namespace stonky::mexc::futures {
 static auto MEXC_FUTURES_WS_HOST = "contract.mexc.com";
 static auto MEXC_FUTURES_WS_PORT = "443";
+static auto MEXC_FUTURES_WS_PATH = "/edge";
 
 struct WSClient::P {
     boost::asio::io_context m_ioContext;
     boost::asio::ssl::context m_ctx;
     std::string m_host = {MEXC_FUTURES_WS_HOST};
     std::string m_port = {MEXC_FUTURES_WS_PORT};
-    std::weak_ptr<WebSocketSession> m_session;
+    std::string m_path = {MEXC_FUTURES_WS_PATH};
+    std::string m_apiKey;
+    std::string m_apiSecret;
+    /// Keeps the session alive across reconnect cycles.
+    std::shared_ptr<WebSocketSession> m_session;
     std::thread m_ioThread;
     std::atomic<bool> m_isRunning = false;
     onLogMessage m_logMessageCB;
     onDataEvent m_dataEventCB;
 
     P() : m_ctx(boost::asio::ssl::context::sslv23_client), m_logMessageCB(defaultLogFunction) {
+    }
+
+    std::shared_ptr<WebSocketSession> ensureSession() {
+        if (m_session) {
+            return m_session;
+        }
+
+        m_session = std::make_shared<WebSocketSession>(m_ioContext, m_ctx, m_logMessageCB);
+
+        if (!m_apiKey.empty() && !m_apiSecret.empty()) {
+            m_session->setCredentials(m_apiKey, m_apiSecret);
+        }
+
+        return m_session;
     }
 };
 
@@ -36,6 +55,10 @@ WSClient::WSClient() : m_p(std::make_unique<P>()) {
 }
 
 WSClient::~WSClient() {
+    if (m_p->m_session) {
+        m_p->m_session->close();
+    }
+
     m_p->m_ioContext.stop();
 
     if (m_p->m_ioThread.joinable()) {
@@ -78,6 +101,22 @@ void WSClient::run() const {
     });
 }
 
+void WSClient::setEndpoint(const std::string &host, const std::string &port, const std::string &path) const {
+    m_p->m_host = host;
+    m_p->m_port = port;
+    m_p->m_path = path;
+}
+
+void WSClient::setCredentials(const std::string &apiKey, const std::string &apiSecret) const {
+    m_p->m_apiKey = apiKey;
+    m_p->m_apiSecret = apiSecret;
+}
+
+void WSClient::connect() const {
+    const auto session = m_p->ensureSession();
+    session->run(m_p->m_host, m_p->m_port, m_p->m_path, nlohmann::json(), m_p->m_dataEventCB);
+    run();
+}
 
 void WSClient::setLoggerCallback(const onLogMessage &onLogMessageCB) const {
     m_p->m_logMessageCB = onLogMessageCB;
@@ -88,21 +127,35 @@ void WSClient::setDataEventCallback(const onDataEvent &onDataEventCB) const {
 }
 
 void WSClient::subscribe(const nlohmann::json &subscriptionRequest) const {
-    if (const auto session = m_p->m_session.lock()) {
+    const bool fresh = !m_p->m_session;
+    const auto session = m_p->ensureSession();
+
+    if (fresh) {
+        session->run(m_p->m_host, m_p->m_port, m_p->m_path, subscriptionRequest, m_p->m_dataEventCB);
+    } else {
         session->subscribe(subscriptionRequest);
-        return;
     }
 
-    const auto ws = std::make_shared<WebSocketSession>(m_p->m_ioContext, m_p->m_ctx, m_p->m_logMessageCB);
-    std::weak_ptr wp{ws};
-    m_p->m_session = std::move(wp);
-    ws->run(MEXC_FUTURES_WS_HOST, MEXC_FUTURES_WS_PORT, subscriptionRequest, m_p->m_dataEventCB);
     run();
 }
 
+void WSClient::unsubscribe(const nlohmann::json &subscriptionRequest) const {
+    if (m_p->m_session) {
+        m_p->m_session->unsubscribe(subscriptionRequest);
+    }
+}
+
 bool WSClient::isSubscribed(const nlohmann::json &subscriptionRequest) const {
-    if (const auto session = m_p->m_session.lock()) {
-        return session->isSubscribed(subscriptionRequest);
+    if (m_p->m_session) {
+        return m_p->m_session->isSubscribed(subscriptionRequest);
+    }
+
+    return false;
+}
+
+bool WSClient::isAuthenticated() const {
+    if (m_p->m_session) {
+        return m_p->m_session->isAuthenticated();
     }
 
     return false;
