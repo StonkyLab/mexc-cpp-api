@@ -21,23 +21,15 @@ namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
 
-/// Authentication source for MEXC futures API
-enum class AuthSource {
-    OpenAPI,  ///< Standard API key + HMAC-SHA256 signature (contract.mexc.com)
-    Web       ///< Browser session token with MD5 signing (futures.mexc.com)
-};
-
 class HTTPSession {
 
     struct P;
     std::unique_ptr<P> m_p{};
 
 public:
-    /// Construct with API key + secret (OpenAPI auth)
+    /// Construct with API key + secret (OpenAPI auth, contract.mexc.com,
+    /// HMAC-SHA256 signing)
     HTTPSession(const std::string &apiKey, const std::string &apiSecret);
-
-    /// Construct with WEB session token (Web auth)
-    explicit HTTPSession(const std::string &webToken, AuthSource source);
 
     ~HTTPSession();
 

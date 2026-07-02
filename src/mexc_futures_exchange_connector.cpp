@@ -59,13 +59,11 @@ void MEXCFuturesExchangeConnector::login(const std::tuple<std::string, std::stri
 
     const auto& [apiKey, apiSecret, passPhrase] = credentials;
 
-    if (apiSecret.empty()) {
-        // WEB token authentication: apiKey contains the WEB session token
-        m_p->m_restClient = std::make_unique<mexc::futures::RESTClient>(apiKey, mexc::futures::AuthSource::Web);
-    } else {
-        // Standard OpenAPI authentication
-        m_p->m_restClient = std::make_unique<mexc::futures::RESTClient>(apiKey, apiSecret);
+    if (apiKey.empty() || apiSecret.empty()) {
+        throw std::runtime_error("MEXC futures requires API key + secret (OpenAPI)");
     }
+
+    m_p->m_restClient = std::make_unique<mexc::futures::RESTClient>(apiKey, apiSecret);
 }
 
 Trade MEXCFuturesExchangeConnector::placeOrder(const Order& order) {

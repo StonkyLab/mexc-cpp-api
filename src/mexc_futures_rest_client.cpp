@@ -99,21 +99,11 @@ RESTClient::RESTClient(const std::string &apiKey, const std::string &apiSecret) 
     m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
 }
 
-RESTClient::RESTClient(const std::string &webToken, const AuthSource source) : m_p(
-    std::make_unique<P>(this)) {
-    m_p->httpSession = std::make_shared<HTTPSession>(webToken, source);
-}
-
 RESTClient::~RESTClient() = default;
 
 void RESTClient::setCredentials(const std::string &apiKey, const std::string &apiSecret) const {
     m_p->httpSession.reset();
     m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
-}
-
-void RESTClient::setWebToken(const std::string &webToken) const {
-    m_p->httpSession.reset();
-    m_p->httpSession = std::make_shared<HTTPSession>(webToken, AuthSource::Web);
 }
 
 std::int64_t RESTClient::getServerTime() const {
@@ -196,7 +186,8 @@ std::vector<OpenPosition> RESTClient::getOpenPositions(const std::string &symbol
 
 OrderResponse RESTClient::submitOrder(const OrderRequest &request) const {
     const std::string path = "/api/v1/private/order/submit";
-    // dump(-1) produces compact JSON (no whitespace) — critical for MD5 signing
+    // dump(-1) produces compact JSON (no whitespace) — the signed body must
+    // byte-match what is sent
     const std::string jsonBody = request.toJson().dump(-1);
 
     m_p->rateLimiter.wait();

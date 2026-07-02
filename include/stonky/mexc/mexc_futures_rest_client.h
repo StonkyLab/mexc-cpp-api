@@ -29,14 +29,9 @@ public:
 	/// Construct with API key + secret (OpenAPI auth)
 	RESTClient(const std::string &apiKey, const std::string &apiSecret);
 
-	/// Construct with WEB session token
-	explicit RESTClient(const std::string &webToken, AuthSource source);
-
 	~RESTClient();
 
 	void setCredentials(const std::string &apiKey, const std::string &apiSecret) const;
-
-	void setWebToken(const std::string &webToken) const;
 
 	/**
 	 * Returns server time in ms
@@ -104,18 +99,18 @@ public:
 	[[nodiscard]] std::vector<OpenPosition> getOpenPositions(const std::string &symbol = {}) const;
 
 	/**
-	 * Submit a futures order (requires WEB token auth)
+	 * Submit a futures order (OpenAPI auth)
 	 * @param request Order parameters
 	 * @return OrderResponse with order ID on success
-	 * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#order-under-maintenance
+	 * @see https://www.mexc.com/api-docs/futures/account-and-trading-endpoints
 	 */
 	[[nodiscard]] OrderResponse submitOrder(const OrderRequest &request) const;
 
 	/**
-	 * Cancel futures orders by ID (requires WEB token auth)
+	 * Cancel futures orders by ID (OpenAPI auth)
 	 * @param orderIds list of order IDs to cancel (max 50)
 	 * @return CancelOrderResponse with per-order results
-	 * @see https://mexcdevelop.github.io/apidocs/contract_v1_en/#cancel-the-order-under-maintenance
+	 * @see https://www.mexc.com/api-docs/futures/account-and-trading-endpoints
 	 */
 	[[nodiscard]] CancelOrderResponse cancelOrders(const std::vector<std::int64_t> &orderIds) const;
 
