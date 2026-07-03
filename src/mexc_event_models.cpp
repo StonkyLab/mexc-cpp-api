@@ -11,6 +11,82 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include "stonky/utils/json_utils.h"
 
 namespace stonky::mexc::futures {
+namespace {
+/// MEXC private channels send numeric fields as EITHER numbers or strings
+/// (e.g. big orderIds and prices arrive as strings). These readers tolerate
+/// both; readValue<T>/readStringAsX each handle only one.
+double readNum(const nlohmann::json &json, const std::string &key, const double def = 0.0) {
+    const auto it = json.find(key);
+
+    if (it == json.end() || it->is_null()) {
+        return def;
+    }
+
+    try {
+        if (it->is_string()) {
+            const auto &s = it->get_ref<const std::string &>();
+            return s.empty() ? def : std::stod(s);
+        }
+
+        if (it->is_number()) {
+            return it->get<double>();
+        }
+    } catch (std::exception &) {
+    }
+
+    return def;
+}
+
+std::int64_t readI64(const nlohmann::json &json, const std::string &key, const std::int64_t def = 0) {
+    const auto it = json.find(key);
+
+    if (it == json.end() || it->is_null()) {
+        return def;
+    }
+
+    try {
+        if (it->is_string()) {
+            const auto &s = it->get_ref<const std::string &>();
+            return s.empty() ? def : std::stoll(s);
+        }
+
+        if (it->is_number()) {
+            return it->get<std::int64_t>();
+        }
+    } catch (std::exception &) {
+    }
+
+    return def;
+}
+
+std::int32_t readI32(const nlohmann::json &json, const std::string &key, const std::int32_t def = 0) {
+    return static_cast<std::int32_t>(readI64(json, key, def));
+}
+
+bool readBoolT(const nlohmann::json &json, const std::string &key, const bool def = false) {
+    const auto it = json.find(key);
+
+    if (it == json.end() || it->is_null()) {
+        return def;
+    }
+
+    if (it->is_boolean()) {
+        return it->get<bool>();
+    }
+
+    if (it->is_string()) {
+        const auto &s = it->get_ref<const std::string &>();
+        return s == "true" || s == "1";
+    }
+
+    if (it->is_number()) {
+        return it->get<double>() != 0.0;
+    }
+
+    return def;
+}
+} // namespace
+
 nlohmann::json WSSubscriptionParameters::toJson() const {
 	nlohmann::json result;
 	result["symbol"] = symbol;
@@ -97,25 +173,21 @@ nlohmann::json EventOrder::toJson() const {
 }
 
 void EventOrder::fromJson(const nlohmann::json &json) {
-	readValue<std::int64_t>(json, "orderId", orderId);
+	orderId = readI64(json, "orderId", orderId);
 	readValue<std::string>(json, "symbol", symbol);
 	readValue<std::string>(json, "externalOid", externalOid);
 
 	/// MEXC sends the enums as integers (1..N), not names — read the int and cast.
-	std::int32_t sideRaw{1}, typeRaw{1}, stateRaw{1};
-	readValue<std::int32_t>(json, "side", sideRaw);
-	readValue<std::int32_t>(json, "orderType", typeRaw);
-	readValue<std::int32_t>(json, "state", stateRaw);
-	side = static_cast<OrderSide>(sideRaw);
-	orderType = static_cast<OrderType>(typeRaw);
-	state = static_cast<OrderState>(stateRaw);
+	side = static_cast<OrderSide>(readI32(json, "side", 1));
+	orderType = static_cast<OrderType>(readI32(json, "orderType", 1));
+	state = static_cast<OrderState>(readI32(json, "state", 1));
 
-	readValue<double>(json, "price", price);
-	readValue<double>(json, "vol", vol);
-	readValue<double>(json, "dealVol", dealVol);
-	readValue<double>(json, "dealAvgPrice", dealAvgPrice);
-	readValue<std::int32_t>(json, "errorCode", errorCode);
-	readValue<std::int64_t>(json, "updateTime", updateTime);
+	price = readNum(json, "price", price);
+	vol = readNum(json, "vol", vol);
+	dealVol = readNum(json, "dealVol", dealVol);
+	dealAvgPrice = readNum(json, "dealAvgPrice", dealAvgPrice);
+	errorCode = readI32(json, "errorCode", errorCode);
+	updateTime = readI64(json, "updateTime", updateTime);
 }
 
 nlohmann::json EventDeal::toJson() const {
@@ -123,18 +195,16 @@ nlohmann::json EventDeal::toJson() const {
 }
 
 void EventDeal::fromJson(const nlohmann::json &json) {
-	readValue<std::int64_t>(json, "id", id);
-	readValue<std::int64_t>(json, "orderId", orderId);
+	id = readI64(json, "id", id);
+	orderId = readI64(json, "orderId", orderId);
 	readValue<std::string>(json, "symbol", symbol);
 
-	std::int32_t sideRaw{1};
-	readValue<std::int32_t>(json, "side", sideRaw);
-	side = static_cast<OrderSide>(sideRaw);
+	side = static_cast<OrderSide>(readI32(json, "side", 1));
 
-	readValue<double>(json, "price", price);
-	readValue<double>(json, "vol", vol);
-	readValue<double>(json, "fee", fee);
-	readValue<bool>(json, "isTaker", isTaker);
-	readValue<std::int64_t>(json, "timestamp", timestamp);
+	price = readNum(json, "price", price);
+	vol = readNum(json, "vol", vol);
+	fee = readNum(json, "fee", fee);
+	isTaker = readBoolT(json, "isTaker", isTaker);
+	timestamp = readI64(json, "timestamp", timestamp);
 }
 }
