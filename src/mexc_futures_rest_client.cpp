@@ -27,26 +27,29 @@ struct RateLimiter {
 
     void wait() {
         std::unique_lock lock(mutex);
-        const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
 
-        // Remove old requests outside the window
-        while (!requestTimes.empty() && now - requestTimes.front() > windowSizeMs) {
-            requestTimes.pop_front();
-        }
+        // Loop: after a sleep other waiters may have refilled the window; keep
+        // re-checking with a FRESH timestamp until there is room. Recording a
+        // stale (pre-sleep) time would make the window look emptier than
+        // reality and let contending leg threads burst above the venue limit.
+        for (;;) {
+            const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
 
-        if (requestTimes.size() >= localLimit) {
-            // Wait until the oldest request expires
-            const auto oldest = requestTimes.front();
-            if (const auto waitTime = (oldest + windowSizeMs) - now + 10; waitTime > 0) {
-                lock.unlock();
-                std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
-                lock.lock();
+            while (!requestTimes.empty() && now - requestTimes.front() > windowSizeMs) {
+                requestTimes.pop_front();
             }
-        }
 
-        // Record this request
-        requestTimes.push_back(now);
+            if (requestTimes.size() < localLimit) {
+                requestTimes.push_back(now);
+                return;
+            }
+
+            const auto waitTime = (requestTimes.front() + windowSizeMs) - now + 10;
+            lock.unlock();
+            std::this_thread::sleep_for(std::chrono::milliseconds(std::max<std::int64_t>(waitTime, 1)));
+            lock.lock();
+        }
     }
 };
 

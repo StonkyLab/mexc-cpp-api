@@ -10,6 +10,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 
 #include <boost/asio/ssl/context.hpp>
 #include <boost/beast/core.hpp>
+#include <mutex>
 #include <thread>
 
 namespace stonky::mexc::futures {
@@ -18,6 +19,11 @@ static auto MEXC_FUTURES_WS_PORT = "443";
 static auto MEXC_FUTURES_WS_PATH = "/edge";
 
 struct WSClient::P {
+    /// Guards the lazy session/io-thread creation — subscribe()/run() are hit
+    /// concurrently by per-leg worker threads on the first rebalance; without
+    /// this, two racing threads could each create a session (one orphaned but
+    /// connected) or double-assign a joinable std::thread (std::terminate).
+    std::recursive_mutex m_clientLocker;
     boost::asio::io_context m_ioContext;
     boost::asio::ssl::context m_ctx;
     std::string m_host = {MEXC_FUTURES_WS_HOST};
@@ -69,6 +75,8 @@ WSClient::~WSClient() {
 }
 
 void WSClient::run() const {
+    std::lock_guard lk(m_p->m_clientLocker);
+
     if (m_p->m_isRunning) {
         return;
     }
@@ -113,6 +121,7 @@ void WSClient::setCredentials(const std::string &apiKey, const std::string &apiS
 }
 
 void WSClient::connect() const {
+    std::lock_guard lk(m_p->m_clientLocker);
     const auto session = m_p->ensureSession();
     session->run(m_p->m_host, m_p->m_port, m_p->m_path, nlohmann::json(), m_p->m_dataEventCB);
     run();
@@ -127,6 +136,7 @@ void WSClient::setDataEventCallback(const onDataEvent &onDataEventCB) const {
 }
 
 void WSClient::subscribe(const nlohmann::json &subscriptionRequest) const {
+    std::lock_guard lk(m_p->m_clientLocker);
     const bool fresh = !m_p->m_session;
     const auto session = m_p->ensureSession();
 
@@ -140,12 +150,16 @@ void WSClient::subscribe(const nlohmann::json &subscriptionRequest) const {
 }
 
 void WSClient::unsubscribe(const nlohmann::json &subscriptionRequest) const {
+    std::lock_guard lk(m_p->m_clientLocker);
+
     if (m_p->m_session) {
         m_p->m_session->unsubscribe(subscriptionRequest);
     }
 }
 
 bool WSClient::isSubscribed(const nlohmann::json &subscriptionRequest) const {
+    std::lock_guard lk(m_p->m_clientLocker);
+
     if (m_p->m_session) {
         return m_p->m_session->isSubscribed(subscriptionRequest);
     }
@@ -154,6 +168,8 @@ bool WSClient::isSubscribed(const nlohmann::json &subscriptionRequest) const {
 }
 
 bool WSClient::isAuthenticated() const {
+    std::lock_guard lk(m_p->m_clientLocker);
+
     if (m_p->m_session) {
         return m_p->m_session->isAuthenticated();
     }

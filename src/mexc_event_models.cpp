@@ -129,7 +129,12 @@ void Event::fromJson(const nlohmann::json &json) {
 	readValue<std::string>(json, "channel", channel);
 	readValue<std::string>(json, "symbol", symbol);
 	readValue<std::int64_t>(json, "ts", ts);
-	data = json["data"];
+
+	/// Guarded — const operator[] on a missing key is UB, and an unexpected
+	/// venue message without "data" must not take the io thread down.
+	if (const auto it = json.find("data"); it != json.end()) {
+		data = *it;
+	}
 }
 
 nlohmann::json EventTicker::toJson() const {
@@ -149,7 +154,7 @@ void EventTicker::fromJson(const nlohmann::json &json) {
 	readValue<double>(json, "indexPrice", indexPrice);
 	readValue<double>(json, "fairPrice", fairPrice);
 	readValue<double>(json, "fundingRate", fundingRate);
-	readValue<std::int64_t>(json, "m_timestamp", timestamp);
+	readValue<std::int64_t>(json, "timestamp", timestamp);
 }
 
 nlohmann::json EventCandlestick::toJson() const {

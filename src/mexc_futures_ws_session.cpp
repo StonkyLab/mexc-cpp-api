@@ -453,6 +453,13 @@ struct WebSocketSession::P {
             return;
         }
 
+        /// Connection greeting — carries the connection id in "data"; without
+        /// this branch it would fall through to the subscribe-ack check and log
+        /// a spurious error on every (re)connect.
+        if (channel == "clientId") {
+            return;
+        }
+
         if (channel == "rs.login") {
             std::string data;
             readValue<std::string>(json, "data", data);
