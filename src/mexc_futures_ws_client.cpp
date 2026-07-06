@@ -7,6 +7,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
 #include "stonky/mexc/mexc_futures_ws_client.h"
+#include "stonky/mexc/tls_verify.h"
 
 #include <boost/asio/ssl/context.hpp>
 #include <boost/beast/core.hpp>
@@ -39,6 +40,7 @@ struct WSClient::P {
     onDataEvent m_dataEventCB;
 
     P() : m_ctx(boost::asio::ssl::context::sslv23_client), m_logMessageCB(defaultLogFunction) {
+        enableTlsPeerVerification(m_ctx);
     }
 
     std::shared_ptr<WebSocketSession> ensureSession() {
