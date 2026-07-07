@@ -20,11 +20,13 @@ namespace stonky::mexc::futures {
 struct RateLimiter {
     std::mutex mutex;
 
-    // Local sliding window rate limiting. 8/s keeps the aggregate safely under
-    // the venue's 20 req/2s: a 10/s window can legally emit 20 requests inside
-    // one venue-side 2 s window, i.e. exactly AT the limit with zero margin.
+    // Local sliding window rate limiting. 6/s: 8/s still drew 510s during a
+    // cleanup burst (live-observed 2026-07-07 12:01) — MEXC's effective
+    // enforcement is stricter than the documented 20 req/2s. Residual 510s are
+    // absorbed by the HTTP session's retry-with-backoff, so this only needs to
+    // keep the steady-state rate polite, not catch every burst.
     std::deque<std::int64_t> requestTimes;
-    const size_t localLimit = 8;
+    const size_t localLimit = 6;
     const std::int64_t windowSizeMs = 1000; // 1 second window
 
     void wait() {

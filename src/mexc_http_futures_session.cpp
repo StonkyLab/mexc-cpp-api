@@ -12,6 +12,9 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/beast/version.hpp>
+#include <spdlog/spdlog.h>
+#include <chrono>
+#include <thread>
 #include "date.h"
 #include "stonky/utils/utils.h"
 
@@ -133,39 +136,64 @@ http::response<http::string_body> HTTPSession::P::request(
 	req.set(http::field::host, uri);
 	req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
 
-	ssl::context ctx{ssl::context::sslv23_client};
-	enableTlsPeerVerification(ctx);
+	const auto performOnce = [this, &req] {
+		ssl::context ctx{ssl::context::sslv23_client};
+		enableTlsPeerVerification(ctx);
 
-	tcp::resolver resolver{ioc};
-	ssl::stream<tcp::socket> stream{ioc, ctx};
-	stream.set_verify_callback(ssl::host_name_verification(uri));
+		tcp::resolver resolver{ioc};
+		ssl::stream<tcp::socket> stream{ioc, ctx};
+		stream.set_verify_callback(ssl::host_name_verification(uri));
 
-	// Set SNI Hostname (many hosts need this to handshake successfully)
-	if (!SSL_set_tlsext_host_name(stream.native_handle(), uri.c_str())) {
-		boost::system::error_code ec{
-			static_cast<int>(::ERR_get_error()),
-			net::error::get_ssl_category()
-		};
-		throw boost::system::system_error{ec};
+		// Set SNI Hostname (many hosts need this to handshake successfully)
+		if (!SSL_set_tlsext_host_name(stream.native_handle(), uri.c_str())) {
+			boost::system::error_code ec{
+				static_cast<int>(::ERR_get_error()),
+				net::error::get_ssl_category()
+			};
+			throw boost::system::system_error{ec};
+		}
+
+		auto const results = resolver.resolve(uri, "443");
+		net::connect(stream.next_layer(), results.begin(), results.end());
+		stream.handshake(ssl::stream_base::client);
+
+		http::write(stream, req);
+		beast::flat_buffer buffer;
+		http::response<http::string_body> response;
+		http::read(stream, buffer, response);
+
+		boost::system::error_code ec;
+		stream.shutdown(ec);
+		if (ec == boost::asio::error::eof) {
+			// Rationale:
+			// http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
+			ec.assign(0, ec.category());
+		}
+
+		return response;
+	};
+
+	// Absorb the venue's throttle HERE, at the single choke point for every
+	// request: MEXC 510 "Requests are too frequent" means the request was
+	// REFUSED (nothing executed), so re-sending the identical request — order
+	// submits included — is safe. Escalating pauses; after the last attempt
+	// the 510 response propagates and the caller's reject handling takes over.
+	// Signatures stay valid across the retries (Request-Time tolerance).
+	constexpr int MAX_THROTTLE_RETRIES = 3;
+
+	for (int attempt = 0;; ++attempt) {
+		auto response = performOnce();
+		const auto &body = response.body();
+		const bool throttled = body.find("\"code\":510") != std::string::npos || body.find("\"code\": 510") != std::string::npos;
+
+		if (!throttled || attempt >= MAX_THROTTLE_RETRIES) {
+			return response;
+		}
+
+		const auto pauseMs = 700LL << attempt; // 0.7 / 1.4 / 2.8 s
+		spdlog::warn(fmt::format("MEXC HTTP throttled (510) — retry {}/{} in {} ms: {} {}", attempt + 1, MAX_THROTTLE_RETRIES, pauseMs,
+		                         std::string(req.method_string()), std::string(req.target())));
+		std::this_thread::sleep_for(std::chrono::milliseconds(pauseMs));
 	}
-
-	auto const results = resolver.resolve(uri, "443");
-	net::connect(stream.next_layer(), results.begin(), results.end());
-	stream.handshake(ssl::stream_base::client);
-
-	http::write(stream, req);
-	beast::flat_buffer buffer;
-	http::response<http::string_body> response;
-	http::read(stream, buffer, response);
-
-	boost::system::error_code ec;
-	stream.shutdown(ec);
-	if (ec == boost::asio::error::eof) {
-		// Rationale:
-		// http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
-		ec.assign(0, ec.category());
-	}
-
-	return response;
 }
 }
