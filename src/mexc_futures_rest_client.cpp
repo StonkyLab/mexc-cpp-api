@@ -20,9 +20,11 @@ namespace stonky::mexc::futures {
 struct RateLimiter {
     std::mutex mutex;
 
-    // Local sliding window rate limiting
+    // Local sliding window rate limiting. 8/s keeps the aggregate safely under
+    // the venue's 20 req/2s: a 10/s window can legally emit 20 requests inside
+    // one venue-side 2 s window, i.e. exactly AT the limit with zero margin.
     std::deque<std::int64_t> requestTimes;
-    const size_t localLimit = 10;           // 10 requests/second (MEXC Futures limit)
+    const size_t localLimit = 8;
     const std::int64_t windowSizeMs = 1000; // 1 second window
 
     void wait() {
@@ -53,6 +55,16 @@ struct RateLimiter {
     }
 };
 
+/// ONE limiter per process: the bot runs several RESTClient instances against
+/// the same API key (strategy executor + execution gateway), and the venue
+/// limit is per key/IP — independent per-instance windows let the aggregate
+/// burst to N× the limit and draw 510 "Requests are too frequent"
+/// (live-observed 2026-07-07 during a rebalance).
+RateLimiter &sharedRateLimiter() {
+    static RateLimiter limiter;
+    return limiter;
+}
+
 template <typename ValueType>
 ValueType handleMEXCResponse(const http::response<http::string_body>& response) {
     ValueType retVal;
@@ -68,7 +80,7 @@ ValueType handleMEXCResponse(const http::response<http::string_body>& response) 
 struct RESTClient::P {
     RESTClient *parent = nullptr;
     std::shared_ptr<HTTPSession> httpSession;
-    mutable RateLimiter rateLimiter;
+    RateLimiter &rateLimiter = sharedRateLimiter();
 
     static http::response<http::string_body> checkResponse(const http::response<http::string_body>& response) {
         if (response.result() != http::status::ok) {
