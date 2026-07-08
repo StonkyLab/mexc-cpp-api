@@ -136,7 +136,13 @@ http::response<http::string_body> HTTPSession::P::request(
 	req.set(http::field::host, uri);
 	req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
 
-	const auto performOnce = [this, &req] {
+	// requestSent tells the retry loop whether the failure happened BEFORE the
+	// request left the socket. Pre-write failures (SNI / resolve / connect / TLS
+	// handshake) never reached the server, so re-sending is always safe — even
+	// for a non-idempotent order submit.
+	const auto performOnce = [this, &req](bool &requestSent) {
+		requestSent = false;
+
 		ssl::context ctx{ssl::context::sslv23_client};
 		enableTlsPeerVerification(ctx);
 
@@ -157,6 +163,7 @@ http::response<http::string_body> HTTPSession::P::request(
 		net::connect(stream.next_layer(), results.begin(), results.end());
 		stream.handshake(ssl::stream_base::client);
 
+		requestSent = true;
 		http::write(stream, req);
 		beast::flat_buffer buffer;
 		http::response<http::string_body> response;
@@ -173,27 +180,43 @@ http::response<http::string_body> HTTPSession::P::request(
 		return response;
 	};
 
-	// Absorb the venue's throttle HERE, at the single choke point for every
-	// request: MEXC 510 "Requests are too frequent" means the request was
-	// REFUSED (nothing executed), so re-sending the identical request — order
-	// submits included — is safe. Escalating pauses; after the last attempt
-	// the 510 response propagates and the caller's reject handling takes over.
-	// Signatures stay valid across the retries (Request-Time tolerance).
-	constexpr int MAX_THROTTLE_RETRIES = 3;
+	// One choke point for every MEXC request, retrying the two cases where the
+	// request provably did NOT execute:
+	//   * a pre-write transport failure — transient TLS handshake alerts /
+	//     connection resets from MEXC's CloudFront WAF (live-observed
+	//     "tlsv1 alert internal error" that otherwise killed the executor at
+	//     startup). Safe because nothing was sent.
+	//   * an app-level 510 "Requests are too frequent" — the venue REFUSED it.
+	// A failure AFTER the write propagates, so a non-idempotent POST is never
+	// silently re-sent. Signatures stay valid across retries (Request-Time
+	// tolerance).
+	constexpr int MAX_RETRIES = 4;
 
 	for (int attempt = 0;; ++attempt) {
-		auto response = performOnce();
-		const auto &body = response.body();
-		const bool throttled = body.find("\"code\":510") != std::string::npos || body.find("\"code\": 510") != std::string::npos;
+		bool requestSent = false;
+		try {
+			auto response = performOnce(requestSent);
+			const auto &body = response.body();
+			const bool throttled = body.find("\"code\":510") != std::string::npos || body.find("\"code\": 510") != std::string::npos;
 
-		if (!throttled || attempt >= MAX_THROTTLE_RETRIES) {
-			return response;
+			if (!throttled || attempt >= MAX_RETRIES) {
+				return response;
+			}
+
+			const auto pauseMs = 700LL << attempt; // 0.7 / 1.4 / 2.8 / 5.6 s
+			spdlog::warn(fmt::format("MEXC HTTP throttled (510) — retry {}/{} in {} ms: {} {}", attempt + 1, MAX_RETRIES, pauseMs,
+			                         std::string(req.method_string()), std::string(req.target())));
+			std::this_thread::sleep_for(std::chrono::milliseconds(pauseMs));
+		} catch (const std::exception &e) {
+			if (requestSent || attempt >= MAX_RETRIES) {
+				throw; // failed after the request was sent, or retries exhausted
+			}
+
+			const auto pauseMs = 500LL << attempt; // 0.5 / 1 / 2 / 4 s
+			spdlog::warn(fmt::format("MEXC HTTP connect/handshake failed ({}) — retry {}/{} in {} ms: {} {}", e.what(), attempt + 1, MAX_RETRIES, pauseMs,
+			                         std::string(req.method_string()), std::string(req.target())));
+			std::this_thread::sleep_for(std::chrono::milliseconds(pauseMs));
 		}
-
-		const auto pauseMs = 700LL << attempt; // 0.7 / 1.4 / 2.8 s
-		spdlog::warn(fmt::format("MEXC HTTP throttled (510) — retry {}/{} in {} ms: {} {}", attempt + 1, MAX_THROTTLE_RETRIES, pauseMs,
-		                         std::string(req.method_string()), std::string(req.target())));
-		std::this_thread::sleep_for(std::chrono::milliseconds(pauseMs));
 	}
 }
 }
