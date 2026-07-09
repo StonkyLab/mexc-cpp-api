@@ -201,6 +201,25 @@ std::vector<OpenPosition> RESTClient::getOpenPositions(const std::string &symbol
     return handleMEXCResponse<OpenPositions>(response).positions;
 }
 
+PositionMode RESTClient::getPositionMode() const {
+    const std::string path = "/api/v1/private/position/position_mode";
+    m_p->rateLimiter.wait();
+    const auto response = P::checkResponse(m_p->httpSession->methodGet(path, {}, false));
+    return static_cast<PositionMode>(handleMEXCResponse<PositionModeResponse>(response).positionMode);
+}
+
+void RESTClient::changePositionMode(const PositionMode mode) const {
+    const std::string path = "/api/v1/private/position/change_position_mode";
+    nlohmann::json body;
+    body["positionMode"] = static_cast<std::int32_t>(mode);
+    // dump(-1): the signed body must byte-match what is sent
+    const std::string jsonBody = body.dump(-1);
+
+    m_p->rateLimiter.wait();
+    const auto response = P::checkResponse(m_p->httpSession->methodPost(path, jsonBody));
+    (void) handleMEXCResponse<Response>(response);
+}
+
 OrderResponse RESTClient::submitOrder(const OrderRequest &request) const {
     const std::string path = "/api/v1/private/order/submit";
     // dump(-1) produces compact JSON (no whitespace) — the signed body must

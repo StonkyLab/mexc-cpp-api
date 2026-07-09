@@ -105,6 +105,17 @@ void ServerTime::fromJson(const nlohmann::json &json) {
     serverTime = data.get<std::int64_t>();
 }
 
+nlohmann::json PositionModeResponse::toJson() const {
+    throw std::runtime_error("Unimplemented: PositionModeResponse::toJson()");
+}
+
+void PositionModeResponse::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+    if (!data.is_null() && data.is_number()) {
+        positionMode = data.get<std::int32_t>();
+    }
+}
+
 nlohmann::json FundingRate::toJson() const {
     throw std::runtime_error("Unimplemented: FundingRate::toJson()");
 }

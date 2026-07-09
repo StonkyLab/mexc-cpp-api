@@ -99,6 +99,21 @@ public:
 	[[nodiscard]] std::vector<OpenPosition> getOpenPositions(const std::string &symbol = {}) const;
 
 	/**
+	 * Read the account's futures position mode (OpenAPI auth).
+	 * @return PositionMode::Hedge (dual long+short) or PositionMode::OneWay (net)
+	 * @see https://www.mexc.com/api-docs/futures/account-and-trading-endpoints
+	 */
+	[[nodiscard]] PositionMode getPositionMode() const;
+
+	/**
+	 * Set the account's futures position mode (OpenAPI auth). MEXC requires the
+	 * book to be FLAT with no open orders — throws otherwise.
+	 * @param mode PositionMode::Hedge or PositionMode::OneWay
+	 * @see https://www.mexc.com/api-docs/futures/account-and-trading-endpoints
+	 */
+	void changePositionMode(PositionMode mode) const;
+
+	/**
 	 * Submit a futures order (OpenAPI auth)
 	 * @param request Order parameters
 	 * @return OrderResponse with order ID on success

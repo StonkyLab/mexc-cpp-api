@@ -50,6 +50,10 @@ enum class MarginType : std::int32_t { Isolated = 1, Cross = 2 };
 /// 1=new/uninformed, 2=uncompleted (resting, maybe partial), 3=completed (filled),
 /// 4=cancelled (may carry a partial dealVol), 5=invalid (rejected)
 enum class OrderState : std::int32_t { New = 1, Uncompleted = 2, Completed = 3, Cancelled = 4, Invalid = 5 };
+
+/// Account futures position mode: 1=hedge (separate long+short per symbol),
+/// 2=one-way (a single net position per symbol).
+enum class PositionMode : std::int32_t { Hedge = 1, OneWay = 2 };
 }
 
 template<>
