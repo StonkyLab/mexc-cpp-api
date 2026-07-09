@@ -78,6 +78,9 @@ else ()
 
     add_executable(mexc_rank_probe test/rank_probe.cpp)
     target_link_libraries(mexc_rank_probe PRIVATE spdlog::spdlog_header_only mexc_api stonky_common OpenSSL::Crypto)
+
+    add_executable(mexc_set_position_mode test/set_position_mode.cpp)
+    target_link_libraries(mexc_set_position_mode PRIVATE spdlog::spdlog_header_only mexc_api stonky_common OpenSSL::Crypto)
 endif ()
 
 target_link_libraries(mexc_api PRIVATE OpenSSL::Crypto OpenSSL::SSL stonky_common nlohmann_json::nlohmann_json)
