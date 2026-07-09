@@ -111,8 +111,14 @@ nlohmann::json PositionModeResponse::toJson() const {
 
 void PositionModeResponse::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
-    if (!data.is_null() && data.is_number()) {
+    // MEXC's own docs are inconsistent about the shape of `data` here: it may be
+    // a bare int (data: 2) or an object (data: {"positionMode": 2}). Accept both
+    // so getPositionMode() never gets silently stuck at 0 — which would make the
+    // one-way guard permanently report "could not determine" and never switch.
+    if (data.is_number_integer()) {
         positionMode = data.get<std::int32_t>();
+    } else if (data.is_object() && data.contains("positionMode") && data["positionMode"].is_number_integer()) {
+        positionMode = data["positionMode"].get<std::int32_t>();
     }
 }
 
