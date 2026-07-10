@@ -60,7 +60,10 @@ if (MODULE_MANAGER)
     add_library(mexc_api SHARED ${SOURCES} ${HEADERS})
 else ()
     add_library(mexc_api STATIC ${SOURCES} ${HEADERS})
+endif ()
 
+option(ENABLE_TESTS "Build mexc_api test executables" OFF)
+if (ENABLE_TESTS)
     add_executable(test_mexc_api_spot test/main_spot.cpp)
     target_link_libraries(test_mexc_api_spot PRIVATE spdlog::spdlog_header_only mexc_api stonky_common OpenSSL::Crypto)
 
