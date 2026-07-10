@@ -229,6 +229,14 @@ struct OrderResponse final : Response {
     void fromJson(const nlohmann::json &json) override;
 };
 
+struct PositionModeResponse final : Response {
+    std::int32_t positionMode{}; ///< 1=hedge, 2=one-way (data is a bare int)
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
 struct CancelOrderResponse final : Response {
     struct Result {
         std::int64_t orderId{};
