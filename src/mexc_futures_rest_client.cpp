@@ -114,6 +114,9 @@ struct RESTClient::P {
 RESTClient::RESTClient(const std::string &apiKey, const std::string &apiSecret) : m_p(
     std::make_unique<P>(this)) {
     m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
+    /// In-session 510 retries must take a limiter slot like any first attempt —
+    /// unpaced ladders let the aggregate rate exceed the venue cap during storms.
+    m_p->httpSession->setRetryPacingHook([] { sharedRateLimiter().wait(); });
 }
 
 RESTClient::~RESTClient() = default;
@@ -121,6 +124,7 @@ RESTClient::~RESTClient() = default;
 void RESTClient::setCredentials(const std::string &apiKey, const std::string &apiSecret) const {
     m_p->httpSession.reset();
     m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret);
+    m_p->httpSession->setRetryPacingHook([] { sharedRateLimiter().wait(); });
 }
 
 std::int64_t RESTClient::getServerTime() const {

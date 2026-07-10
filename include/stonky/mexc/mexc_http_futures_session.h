@@ -12,6 +12,7 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include <boost/asio/connect.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
+#include <functional>
 #include <string>
 #include <map>
 
@@ -36,6 +37,12 @@ public:
     [[nodiscard]] http::response<http::string_body> methodGet(const std::string &path, const std::map<std::string, std::string> &parameters, bool isPublic = true) const;
 
     [[nodiscard]] http::response<http::string_body> methodPost(const std::string &path, const std::string &jsonBody) const;
+
+    /// Called before every RETRY attempt (not the first — call sites pace that
+    /// themselves). The owner points it at its rate limiter so in-session
+    /// retries take a window slot like any other venue request instead of
+    /// bypassing the limiter.
+    void setRetryPacingHook(const std::function<void()> &hook);
 };
 }
 #endif // INCLUDE_STONKY_MEXC_HTTP_FUTURES_SESSION_H

@@ -31,12 +31,14 @@ struct HTTPSession::P {
 	std::string apiSecret;
 	std::string uri;
 	const EVP_MD *evpMd;
+	std::function<void()> retryPacingHook;
 
 	P() : evpMd(EVP_sha256()) {
 		uri = API_URI_FUTURES;
 	}
 
-	http::response<http::string_body> request(http::request<http::string_body> req);
+	http::response<http::string_body> request(http::request<http::string_body> req,
+	                                          const std::function<void(http::request<http::string_body> &)> &reauth = {});
 
 	static std::string createQueryStr(const std::map<std::string, std::string> &parameters) {
 		std::string queryStr;
@@ -114,6 +116,7 @@ http::response<http::string_body> HTTPSession::methodGet(const std::string &path
 
 	if (!isPublic) {
 		m_p->authenticateGet(req, parameters);
+		return m_p->request(req, [this, &parameters](http::request<http::string_body> &r) { m_p->authenticateGet(r, parameters); });
 	}
 
 	return m_p->request(req);
@@ -128,11 +131,13 @@ http::response<http::string_body> HTTPSession::methodPost(const std::string &pat
 
 	m_p->authenticatePost(req, jsonBody);
 
-	return m_p->request(req);
+	return m_p->request(req, [this, &jsonBody](http::request<http::string_body> &r) { m_p->authenticatePost(r, jsonBody); });
 }
 
+void HTTPSession::setRetryPacingHook(const std::function<void()> &hook) { m_p->retryPacingHook = hook; }
+
 http::response<http::string_body> HTTPSession::P::request(
-	http::request<http::string_body> req) {
+	http::request<http::string_body> req, const std::function<void(http::request<http::string_body> &)> &reauth) {
 	req.set(http::field::host, uri);
 	req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
 
@@ -188,11 +193,27 @@ http::response<http::string_body> HTTPSession::P::request(
 	//     startup). Safe because nothing was sent.
 	//   * an app-level 510 "Requests are too frequent" — the venue REFUSED it.
 	// A failure AFTER the write propagates, so a non-idempotent POST is never
-	// silently re-sent. Signatures stay valid across retries (Request-Time
-	// tolerance).
+	// silently re-sent.
 	constexpr int MAX_RETRIES = 4;
 
 	for (int attempt = 0;; ++attempt) {
+		if (attempt > 0) {
+			// A retry is a NEW venue request. It must (a) take a rate-limiter
+			// slot like any other (unpaced ladders from concurrent legs kept the
+			// aggregate above the venue cap, so storms self-sustained) and (b)
+			// carry a FRESH Request-Time/Signature — the tail of the old ladder
+			// re-sent a >10 s-stale signature, which the venue rejected with 513
+			// "Invalid request, please try again later" (live: 4 of 4 ladder
+			// exhaustions ended that way).
+			if (retryPacingHook) {
+				retryPacingHook();
+			}
+
+			if (reauth) {
+				reauth(req);
+			}
+		}
+
 		bool requestSent = false;
 		try {
 			auto response = performOnce(requestSent);
