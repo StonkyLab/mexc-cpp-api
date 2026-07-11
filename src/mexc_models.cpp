@@ -480,8 +480,11 @@ void ContractDetail::fromJson(const nlohmann::json &json) {
     readValue<std::int32_t>(json, "maxVol", maxVol);
     readValue<std::int32_t>(json, "volUnit", volUnit);
     readValue<double>(json, "priceUnit", priceUnit);
-    readValue<std::int32_t>(json, "pricePrecision", pricePrecision);
-    readValue<std::int32_t>(json, "volPrecision", volPrecision);
+    /// The venue fields are "priceScale"/"volScale" (decimal places); keys
+    /// named "pricePrecision"/"volPrecision" do not exist in the API response,
+    /// so reading them left these members silently at their defaults (2/0).
+    readValue<std::int32_t>(json, "priceScale", pricePrecision);
+    readValue<std::int32_t>(json, "volScale", volPrecision);
 
     if (json.contains("state") && json["state"].is_number()) {
         state = static_cast<ContractState>(json["state"].get<std::int32_t>());

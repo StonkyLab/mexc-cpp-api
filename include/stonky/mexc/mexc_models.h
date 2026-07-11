@@ -287,8 +287,8 @@ struct ContractDetail final : IJson {
     std::int32_t maxVol{1000000};
     std::int32_t volUnit{1};
     double priceUnit{0.1};   ///< actual price tick in quote terms (e.g. 0.1 USDT), NOT an integer
-    std::int32_t pricePrecision{2};
-    std::int32_t volPrecision{0};
+    std::int32_t pricePrecision{2}; ///< venue "priceScale" — price decimal places
+    std::int32_t volPrecision{0};   ///< venue "volScale" — volume decimal places
     std::vector<std::string> conceptPlate{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
