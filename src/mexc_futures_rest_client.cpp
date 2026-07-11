@@ -258,6 +258,13 @@ OrderResponse RESTClient::cancelOrderByExternalOid(const std::string &symbol, co
     return handleMEXCResponse<OrderResponse>(response);
 }
 
+OrderDetail RESTClient::getOrderByExternalOid(const std::string &symbol, const std::string &externalOid) const {
+    const std::string path = "/api/v1/private/order/external/" + symbol + "/" + externalOid;
+    m_p->rateLimiter.wait();
+    const auto response = P::checkResponse(m_p->httpSession->methodGet(path, {}, false));
+    return handleMEXCResponse<OrderDetailResponse>(response).order;
+}
+
 std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &symbol, const CandleInterval interval,
                                                      const std::int64_t startTime, const std::int64_t endTime,
                                                      const onCandlesDownloaded &writer) const {

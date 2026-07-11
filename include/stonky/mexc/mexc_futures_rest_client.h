@@ -141,6 +141,18 @@ public:
 	[[nodiscard]] OrderResponse cancelOrderByExternalOid(const std::string &symbol, const std::string &externalOid) const;
 
 	/**
+	 * Query an order by its client-set external order id (OpenAPI auth).
+	 * Returns venue truth (dealVol/dealAvgPrice/state) even after the order
+	 * left the book, so a fill missed on the private WS (reconnect gap) can
+	 * be reconciled from REST.
+	 * @param symbol contract symbol (e.g., BTC_USDT)
+	 * @param externalOid the externalOid set on the order at submit time
+	 * @return OrderDetail
+	 * @see https://www.mexc.com/api-docs/futures/account-and-trading-endpoints
+	 */
+	[[nodiscard]] OrderDetail getOrderByExternalOid(const std::string &symbol, const std::string &externalOid) const;
+
+	/**
 	 * Download historical candles
 	 * @param symbol e.g. BTC_USDT
 	 * @param interval candle interval

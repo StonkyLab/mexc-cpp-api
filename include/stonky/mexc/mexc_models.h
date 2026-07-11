@@ -229,6 +229,32 @@ struct OrderResponse final : Response {
     void fromJson(const nlohmann::json &json) override;
 };
 
+/// Order queried back from the venue — the subset needed to reconcile fills
+/// missed on the private WS (order/external endpoint).
+struct OrderDetail final : IJson {
+    std::int64_t orderId{};
+    std::string externalOid{};
+    std::string symbol{};
+    double price{};
+    double vol{};                ///< order size in contracts
+    double dealVol{};            ///< filled size in contracts (cumulative)
+    double dealAvgPrice{};
+    std::int32_t state{};        ///< OrderState numeric: 2 uncompleted, 3 completed, 4 cancelled, 5 invalid
+    std::int32_t errorCode{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+struct OrderDetailResponse final : Response {
+    OrderDetail order{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
 struct PositionModeResponse final : Response {
     std::int32_t positionMode{}; ///< 1=hedge, 2=one-way (data is a bare int)
 

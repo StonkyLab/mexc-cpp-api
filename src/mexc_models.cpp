@@ -401,6 +401,43 @@ void OrderResponse::fromJson(const nlohmann::json &json) {
     }
 }
 
+nlohmann::json OrderDetail::toJson() const {
+    throw std::runtime_error("Unimplemented: OrderDetail::toJson()");
+}
+
+void OrderDetail::fromJson(const nlohmann::json &json) {
+    /// MEXC serializes large order ids either as a number or a string
+    /// depending on the endpoint — accept both.
+    if (json.contains("orderId")) {
+        if (json["orderId"].is_string()) {
+            orderId = std::stoll(json["orderId"].get<std::string>());
+        } else if (json["orderId"].is_number_integer()) {
+            orderId = json["orderId"].get<std::int64_t>();
+        }
+    }
+
+    readValue<std::string>(json, "externalOid", externalOid);
+    readValue<std::string>(json, "symbol", symbol);
+    readValue<double>(json, "price", price);
+    readValue<double>(json, "vol", vol);
+    readValue<double>(json, "dealVol", dealVol);
+    readValue<double>(json, "dealAvgPrice", dealAvgPrice);
+    readValue<std::int32_t>(json, "state", state);
+    readValue<std::int32_t>(json, "errorCode", errorCode);
+}
+
+nlohmann::json OrderDetailResponse::toJson() const {
+    throw std::runtime_error("Unimplemented: OrderDetailResponse::toJson()");
+}
+
+void OrderDetailResponse::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+
+    if (data.is_object()) {
+        order.fromJson(data);
+    }
+}
+
 nlohmann::json CancelOrderResponse::toJson() const {
     throw std::runtime_error("Unimplemented: CancelOrderResponse::toJson()");
 }
