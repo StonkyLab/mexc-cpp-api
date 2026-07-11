@@ -14,7 +14,10 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include <boost/beast/version.hpp>
 #include <spdlog/spdlog.h>
 #include <chrono>
+#include <memory>
+#include <mutex>
 #include <thread>
+#include <vector>
 #include "date.h"
 #include "stonky/utils/utils.h"
 
@@ -25,7 +28,6 @@ using tcp = net::ip::tcp;
 const auto API_URI_FUTURES = "contract.mexc.com";
 
 struct HTTPSession::P {
-	net::io_context ioc;
 	std::string apiKey;
 	int receiveWindow = 25000;
 	std::string apiSecret;
@@ -33,8 +35,79 @@ struct HTTPSession::P {
 	const EVP_MD *evpMd;
 	std::function<void()> retryPacingHook;
 
+	/// One keep-alive connection: TLS stream plus its own io_context (all ops
+	/// are blocking; a per-connection ioc keeps concurrent requests on
+	/// different connections fully independent).
+	struct Conn {
+		net::io_context ioc;
+		ssl::context ctx{ssl::context::sslv23_client};
+		std::unique_ptr<ssl::stream<tcp::socket>> stream;
+		std::chrono::steady_clock::time_point lastUsed{};
+	};
+
+	/// Idle keep-alive connections. Every request previously paid a fresh
+	/// DNS+TCP+TLS handshake (~300-600 ms) — the dominant per-action latency
+	/// of a chase re-price. Reuse is capped by idle age (the server/edge
+	/// silently closes idle connections, and a request written into a
+	/// half-closed socket cannot be safely retried when non-idempotent) and
+	/// by pool size (fd hygiene).
+	std::mutex poolM;
+	std::vector<std::unique_ptr<Conn>> pool;
+	static constexpr auto maxConnIdle = std::chrono::seconds(25);
+	static constexpr std::size_t maxPoolSize = 4;
+
 	P() : evpMd(EVP_sha256()) {
 		uri = API_URI_FUTURES;
+	}
+
+	[[nodiscard]] std::unique_ptr<Conn> takeConn() {
+		std::lock_guard lk(poolM);
+		const auto now = std::chrono::steady_clock::now();
+
+		while (!pool.empty()) {
+			auto conn = std::move(pool.back());
+			pool.pop_back();
+
+			if (now - conn->lastUsed <= maxConnIdle) {
+				return conn;
+			}
+			/// aged out — dropped; the destructor closes the socket
+		}
+
+		return nullptr;
+	}
+
+	void returnConn(std::unique_ptr<Conn> conn) {
+		conn->lastUsed = std::chrono::steady_clock::now();
+		std::lock_guard lk(poolM);
+
+		if (pool.size() < maxPoolSize) {
+			pool.push_back(std::move(conn));
+		}
+	}
+
+	/// Fresh DNS+TCP+TLS connection. Every failure in here happens BEFORE any
+	/// request byte leaves the socket, so the caller may always re-send.
+	[[nodiscard]] std::unique_ptr<Conn> freshConn() {
+		auto conn = std::make_unique<Conn>();
+		enableTlsPeerVerification(conn->ctx);
+		conn->stream = std::make_unique<ssl::stream<tcp::socket>>(conn->ioc, conn->ctx);
+		conn->stream->set_verify_callback(ssl::host_name_verification(uri));
+
+		// Set SNI Hostname (many hosts need this to handshake successfully)
+		if (!SSL_set_tlsext_host_name(conn->stream->native_handle(), uri.c_str())) {
+			boost::system::error_code ec{
+				static_cast<int>(::ERR_get_error()),
+				net::error::get_ssl_category()
+			};
+			throw boost::system::system_error{ec};
+		}
+
+		tcp::resolver resolver{conn->ioc};
+		auto const results = resolver.resolve(uri, "443");
+		net::connect(conn->stream->next_layer(), results.begin(), results.end());
+		conn->stream->handshake(ssl::stream_base::client);
+		return conn;
 	}
 
 	http::response<http::string_body> request(http::request<http::string_body> req,
@@ -144,42 +217,35 @@ http::response<http::string_body> HTTPSession::P::request(
 	// requestSent tells the retry loop whether the failure happened BEFORE the
 	// request left the socket. Pre-write failures (SNI / resolve / connect / TLS
 	// handshake) never reached the server, so re-sending is always safe — even
-	// for a non-idempotent order submit.
-	const auto performOnce = [this, &req](bool &requestSent) {
+	// for a non-idempotent order submit. usedPooledConn marks a reused
+	// keep-alive connection: a post-write failure there is most likely the
+	// server's silent idle-close, retryable for idempotent requests.
+	const auto performOnce = [this, &req](bool &requestSent, bool &usedPooledConn) {
 		requestSent = false;
+		auto conn = takeConn();
+		usedPooledConn = conn != nullptr;
 
-		ssl::context ctx{ssl::context::sslv23_client};
-		enableTlsPeerVerification(ctx);
-
-		tcp::resolver resolver{ioc};
-		ssl::stream<tcp::socket> stream{ioc, ctx};
-		stream.set_verify_callback(ssl::host_name_verification(uri));
-
-		// Set SNI Hostname (many hosts need this to handshake successfully)
-		if (!SSL_set_tlsext_host_name(stream.native_handle(), uri.c_str())) {
-			boost::system::error_code ec{
-				static_cast<int>(::ERR_get_error()),
-				net::error::get_ssl_category()
-			};
-			throw boost::system::system_error{ec};
+		if (!conn) {
+			conn = freshConn();
 		}
 
-		auto const results = resolver.resolve(uri, "443");
-		net::connect(stream.next_layer(), results.begin(), results.end());
-		stream.handshake(ssl::stream_base::client);
-
 		requestSent = true;
-		http::write(stream, req);
+		http::write(*conn->stream, req);
 		beast::flat_buffer buffer;
 		http::response<http::string_body> response;
-		http::read(stream, buffer, response);
+		http::read(*conn->stream, buffer, response);
 
-		boost::system::error_code ec;
-		stream.shutdown(ec);
-		if (ec == boost::asio::error::eof) {
-			// Rationale:
-			// http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
-			ec.assign(0, ec.category());
+		if (response.keep_alive()) {
+			/// Server keeps the connection open — pool it for the next request.
+			returnConn(std::move(conn));
+		} else {
+			boost::system::error_code ec;
+			conn->stream->shutdown(ec);
+			if (ec == boost::asio::error::eof) {
+				// Rationale:
+				// http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
+				ec.assign(0, ec.category());
+			}
 		}
 
 		return response;
@@ -195,6 +261,7 @@ http::response<http::string_body> HTTPSession::P::request(
 	// A failure AFTER the write propagates, so a non-idempotent POST is never
 	// silently re-sent.
 	constexpr int MAX_RETRIES = 4;
+	bool staleConnRetried = false;
 
 	for (int attempt = 0;; ++attempt) {
 		if (attempt > 0) {
@@ -215,8 +282,9 @@ http::response<http::string_body> HTTPSession::P::request(
 		}
 
 		bool requestSent = false;
+		bool usedPooledConn = false;
 		try {
-			auto response = performOnce(requestSent);
+			auto response = performOnce(requestSent, usedPooledConn);
 			const auto &body = response.body();
 			const bool throttled = body.find("\"code\":510") != std::string::npos || body.find("\"code\": 510") != std::string::npos;
 
@@ -229,6 +297,18 @@ http::response<http::string_body> HTTPSession::P::request(
 			                         std::string(req.method_string()), std::string(req.target())));
 			std::this_thread::sleep_for(std::chrono::milliseconds(pauseMs));
 		} catch (const std::exception &e) {
+			/// A request that died AFTER the write on a REUSED connection most
+			/// likely hit the server's silent idle-close, not a real transport
+			/// fault. A GET is idempotent — retry it once, immediately, on a
+			/// fresh connection (the pooled one was discarded by the failure).
+			/// A POST must propagate: the order may or may not have reached the
+			/// venue, and the caller's safety-cancel path owns that ambiguity.
+			if (requestSent && usedPooledConn && req.method() == http::verb::get && !staleConnRetried) {
+				staleConnRetried = true;
+				spdlog::debug(fmt::format("MEXC HTTP keep-alive connection was stale ({}) — retrying GET on a fresh one: {}", e.what(), std::string(req.target())));
+				continue;
+			}
+
 			if (requestSent || attempt >= MAX_RETRIES) {
 				throw; // failed after the request was sent, or retries exhausted
 			}
